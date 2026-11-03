@@ -18,11 +18,10 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        // Clear background layar jadi abu-abu gelap
+
         Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Update logika & render grafis
         playState.update();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
