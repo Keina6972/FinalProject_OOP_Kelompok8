@@ -1,7 +1,6 @@
 package com.kelompok8.frontend.states;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Bullet;
@@ -20,20 +19,19 @@ public class PlayState {
     public PlayState() {
         this.player = new Player(100, 100);
         this.bullets = new ArrayList<>();
-        // Boss berdiri di atas lantai (Y = 100) di sebelah kanan
         this.dummyBoss = new DummyBoss(Gdx.graphics.getWidth() - 150, 100, 80, 120);
     }
 
     public void update() {
         player.update();
 
-        // Tembak menggunakan tombol 'J' atau Klik Kiri Mouse
+        // Panggil fungsi nembak (otomatis mengecek tombol X)
         Bullet b = player.shoot();
         if (b != null) {
             bullets.add(b);
         }
 
-        // Update Peluru & Cek Hitbox ke Bos
+        // Update Peluru & Collision Check ke Boss
         Iterator<Bullet> it = bullets.iterator();
         while (it.hasNext()) {
             Bullet bullet = it.next();

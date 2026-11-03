@@ -8,80 +8,89 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Player extends Entity {
     private float velY = 0;
-    private final float GRAVITY = -1200.0f; // Kekuatan gravitasi
-    private final float JUMP_VELOCITY = 550.0f; // Kecepatan lompat
-    private final float GROUND_Y = 100.0f; // Garis lantai arena sementara
+    private final float GRAVITY = -1200.0f;
+    private final float JUMP_VELOCITY = 550.0f;
+    private final float GROUND_Y = 100.0f;
     private boolean isGrounded = false;
+
+    // Status Arah Menghadap (Default Kanan)
+    private boolean facingRight = true;
 
     private float shootCooldown = 0.15f;
     private float shootTimer = 0;
 
     public Player(float x, float y) {
-        super(x, y, 32, 48, 300.0f); // Ukuran karakter 32x48
+        super(x, y, 32, 48, 300.0f);
     }
 
     @Override
     public void update() {
         float dt = Gdx.graphics.getDeltaTime();
 
-        // 1. Horizontal Movement (Kiri & Kanan saja)
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        // 1. Horizontal Movement & Facing Logic (Arrow Left / Right)
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             x -= speed * dt;
+            facingRight = false;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             x += speed * dt;
+            facingRight = true;
         }
 
-        // 2. Jumping Logic & Gravitasi
-        if ((Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) && isGrounded) {
+        // 2. Jumping Logic (Tombol Z)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && isGrounded) {
             velY = JUMP_VELOCITY;
             isGrounded = false;
         }
 
-        // Aplikasikan gravitasi
+        // Gravitasi & Ground Collision
         velY += GRAVITY * dt;
         y += velY * dt;
 
-        // Ground Collision sederhana
         if (y <= GROUND_Y) {
             y = GROUND_Y;
             velY = 0;
             isGrounded = true;
         }
 
-        // Batasi pergerakan agar tidak keluar layar kiri/kanan
+        // Pembatas Layar
         if (x < 0) x = 0;
         if (x > Gdx.graphics.getWidth() - width) x = Gdx.graphics.getWidth() - width;
 
         if (shootTimer > 0) shootTimer -= dt;
     }
 
-    // 3. Logika 8-Axis Aiming berdasarkan tombol yang ditekan
+    // 3. Logika Menembak 8-Axis dengan Keyboard (Tombol X + Arrow Keys)
     public Bullet shoot() {
-        if (shootTimer <= 0 && Gdx.input.isKeyPressed(Input.Keys.J)) { // Tombol 'J' atau Klik Kiri untuk nembak
+        if (shootTimer <= 0 && Gdx.input.isKeyPressed(Input.Keys.X)) {
             shootTimer = shootCooldown;
 
             float dirX = 0;
             float dirY = 0;
 
-            boolean up = Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP);
-            boolean down = Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
-            boolean left = Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
-            boolean right = Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
+            boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
+            boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+            boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
+            boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
 
-            // Tentukan arah berdasarkan input 8-Axis
+            // Deteksi Arah Aiming dari Panah
             if (up) dirY += 1;
             if (down && !isGrounded) dirY -= 1; // Menembak ke bawah hanya saat di udara
             if (left) dirX -= 1;
             if (right) dirX += 1;
 
-            // Jika tidak menekan tombol arah sama sekali, default nembak ke depan (misal kanan)
+            // Jika tidak menekan panah sama sekali, nembak sesuai arah badan menghadap (Kiri/Kanan)
             if (dirX == 0 && dirY == 0) {
-                dirX = 1;
+                dirX = facingRight ? 1 : -1;
             }
 
-            Vector2 dir = new Vector2(dirX, dirY).nor(); // Normalize arah vektor
-            return new Bullet(x + width / 2f - 4, y + height / 2f - 4, dir.x, dir.y, 10);
+            // Normalisasi vektor agar kecepatan tembakan diagonal tetap konstan
+            Vector2 dir = new Vector2(dirX, dirY).nor();
+
+            float bulletStartX = x + width / 2f - 4;
+            float bulletStartY = y + height / 2f - 4;
+
+            return new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, 10);
         }
         return null;
     }
@@ -90,5 +99,10 @@ public class Player extends Entity {
     public void render(ShapeRenderer shape) {
         shape.setColor(Color.CYAN);
         shape.rect(x, y, width, height);
+
+        // Indikator visual sederhana (Mata/Arah Menghadap)
+        shape.setColor(Color.WHITE);
+        float eyeX = facingRight ? (x + width - 8) : x + 2;
+        shape.rect(eyeX, y + height - 12, 6, 6);
     }
 }
