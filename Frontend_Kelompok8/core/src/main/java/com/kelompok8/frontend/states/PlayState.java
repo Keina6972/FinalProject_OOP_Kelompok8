@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Bullet;
-import com.kelompok8.frontend.entities.Entity;
 import com.kelompok8.frontend.entities.Player;
+import com.kelompok8.frontend.entities.enemies.Boss;
 import com.kelompok8.frontend.utils.CollisionDetector;
 
 import java.util.ArrayList;
@@ -14,12 +14,12 @@ import java.util.Iterator;
 public class PlayState {
     private Player player;
     private ArrayList<Bullet> bullets;
-    private DummyBoss dummyBoss;
+    private Boss boss;
 
     public PlayState() {
         this.player = new Player(100, 100);
         this.bullets = new ArrayList<>();
-        this.dummyBoss = new DummyBoss(Gdx.graphics.getWidth() - 150, 100, 80, 120);
+        this.boss = new Boss("Boss", Gdx.graphics.getWidth() - 150, 100, player);
     }
 
     public void update() {
@@ -37,9 +37,9 @@ public class PlayState {
             Bullet bullet = it.next();
             bullet.update();
 
-            if (dummyBoss.isActive() && CollisionDetector.checkCollision(bullet, dummyBoss)) {
+            if (boss.isActive() && CollisionDetector.checkCollision(bullet, boss)) {
                 bullet.setActive(false);
-                dummyBoss.takeHit();
+                boss.takeDamage(bullet.getDamage());
             }
 
             if (!bullet.isActive()) {
@@ -47,7 +47,7 @@ public class PlayState {
             }
         }
 
-        dummyBoss.update();
+        boss.update();
     }
 
     public void render(ShapeRenderer shape) {
@@ -59,25 +59,6 @@ public class PlayState {
         for (Bullet bullet : bullets) {
             bullet.render(shape);
         }
-        dummyBoss.render(shape);
-    }
-
-    private class DummyBoss extends Entity {
-        private int hitCount = 0;
-
-        public DummyBoss(float x, float y, float w, float h) {
-            super(x, y, w, h, 0);
-        }
-
-        public void takeHit() { hitCount++; }
-
-        @Override
-        public void update() {}
-
-        @Override
-        public void render(ShapeRenderer shape) {
-            shape.setColor(hitCount % 2 == 0 ? Color.RED : Color.WHITE);
-            shape.rect(x, y, width, height);
-        }
+        boss.render(shape);
     }
 }

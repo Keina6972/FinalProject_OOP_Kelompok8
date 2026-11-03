@@ -13,6 +13,16 @@ public class Player extends Entity {
     private final float GROUND_Y = 100.0f;
     private boolean isGrounded = false;
 
+
+    // ijin nambahin  --Baygonz
+    //HP player dan invulnerable
+    private float hp = 100f;
+    private final float maxHp = 100f;
+    private float invulnTimer = 0f;
+    private static final float INVULN_DURATION = 1.0f;
+    // ijin nambahin  --Baygonz
+
+
     // Status Arah Menghadap (Default Kanan)
     private boolean facingRight = true;
 
@@ -23,9 +33,31 @@ public class Player extends Entity {
         super(x, y, 32, 48, 300.0f);
     }
 
+
+    // ijin nambahin  --Baygonz
+    //kebal saat kena damage
+    public void takeDamage(float damage) {
+        if (invulnTimer > 0f || !active) return;
+        hp -= damage;
+        invulnTimer = INVULN_DURATION;
+        System.out.println("Player HP: " + hp);
+        if (hp <= 0f) { hp = 0f; active = false; }
+    }
+    public float getHp() { return hp; }
+    public float getMaxHp() { return maxHp; }
+    public boolean isInvulnerable() { return invulnTimer > 0f; }
+    // ijin nambahin  --Baygonz
+
+
     @Override
     public void update() {
         float dt = Gdx.graphics.getDeltaTime();
+
+
+        // ijin nambahin  --Baygonz
+        if (invulnTimer > 0f) invulnTimer -= dt;
+        // ijin nambahin  --Baygonz
+
 
         // 1. Horizontal Movement & Facing Logic (Arrow Left / Right)
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -97,6 +129,13 @@ public class Player extends Entity {
 
     @Override
     public void render(ShapeRenderer shape) {
+
+
+        // ijin nambahin  --Baygonz
+        if (invulnTimer > 0f && ((int) (invulnTimer * 10)) % 2 == 0) return;  // kedapkedip
+        // ijin nambahin  --Baygonz
+
+
         shape.setColor(Color.CYAN);
         shape.rect(x, y, width, height);
 
