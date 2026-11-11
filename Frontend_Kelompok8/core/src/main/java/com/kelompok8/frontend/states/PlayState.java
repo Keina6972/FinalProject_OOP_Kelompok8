@@ -60,5 +60,14 @@ public class PlayState {
             bullet.render(shape);
         }
         boss.render(shape);
+        // Mukhtar: Indikator Phase Boss untuk kebutuhan debugging
+        shape.setColor(Color.WHITE);
+
+        if (boss.getCurrentPhase() == 1) {
+            shape.rect(10f, Gdx.graphics.getHeight() - 20f, 100f, 8f);
+        } else {
+            shape.setColor(Color.ORANGE);
+            shape.rect(10f, Gdx.graphics.getHeight() - 20f, 100f, 8f);
+        }
     }
 }
