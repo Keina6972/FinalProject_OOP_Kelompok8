@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Bullet;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.Boss;
+import com.kelompok8.frontend.entities.enemies.MiniBossA;
 import com.kelompok8.frontend.utils.CollisionDetector;
 
 import java.util.ArrayList;
@@ -15,11 +16,16 @@ public class PlayState {
     private Player player;
     private ArrayList<Bullet> bullets;
     private Boss boss;
+    private MiniBossA miniBossA;   // rizki : sementara buat ngetes MiniBossA
 
     public PlayState() {
         this.player = new Player(100, 100);
         this.bullets = new ArrayList<>();
         this.boss = new Boss("Boss", Gdx.graphics.getWidth() - 150, 100, player);
+
+        // rizki : sementara: Boss dimatikan biar MiniBossA bisa dites sendirian (apus 2 baris ini kalo spawn order dah jadi)
+        this.boss.setActive(false);
+        this.miniBossA = new MiniBossA("Miniboss A", Gdx.graphics.getWidth() - 200, 100, player);
     }
 
     public void update() {
@@ -42,12 +48,18 @@ public class PlayState {
                 boss.takeDamage(bullet.getDamage());
             }
 
+            if (bullet.isActive() && miniBossA.isActive() && CollisionDetector.checkCollision(bullet, miniBossA)) {
+                bullet.setActive(false);
+                miniBossA.takeDamage(bullet.getDamage());
+            }
+
             if (!bullet.isActive()) {
                 it.remove();
             }
         }
 
         boss.update();
+        miniBossA.update();
     }
 
     public void render(ShapeRenderer shape) {
@@ -60,6 +72,7 @@ public class PlayState {
             bullet.render(shape);
         }
         boss.render(shape);
+        miniBossA.render(shape);
         // Mukhtar: Indikator Phase Boss untuk kebutuhan debugging
         shape.setColor(Color.WHITE);
 
