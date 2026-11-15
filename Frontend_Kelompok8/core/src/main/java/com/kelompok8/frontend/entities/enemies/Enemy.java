@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Entity;
 
-public class Enemy extends Entity {
+public abstract class Enemy extends Entity {
     protected final String name;
     protected final float maxHp;
     protected float hp;

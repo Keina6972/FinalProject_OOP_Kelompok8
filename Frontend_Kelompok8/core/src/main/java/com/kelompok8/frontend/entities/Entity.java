@@ -8,6 +8,7 @@ public abstract class Entity {
     protected float width, height;
     protected float speed;
     protected boolean active = true;
+    private final Rectangle bounds = new Rectangle();
 
     public Entity(float x, float y, float width, float height, float speed) {
         this.x = x;
@@ -21,11 +22,16 @@ public abstract class Entity {
     public abstract void render(ShapeRenderer shape);
 
     public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+        bounds.set(x, y, width, height);
+        return bounds;
     }
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public float getX() { return x; }
     public float getY() { return y; }
+    public float getWidth() { return width; }
+    public float getHeight() { return height; }
+    public float getCenterX() { return x + width / 2f; }
+    public float getCenterY() { return y + height / 2f; }
 }

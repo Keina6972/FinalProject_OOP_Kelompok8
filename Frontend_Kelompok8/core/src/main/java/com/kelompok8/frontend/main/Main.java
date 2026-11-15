@@ -3,34 +3,39 @@ package com.kelompok8.frontend.main;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.kelompok8.frontend.states.GameStateManager;
 import com.kelompok8.frontend.states.PlayState;
 
 public class Main extends ApplicationAdapter {
+    private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
-    private PlayState playState;
+    private GameStateManager gsm;
 
     @Override
     public void create() {
+        batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-        playState = new PlayState();
+        gsm = new GameStateManager();
+        gsm.setState(new PlayState(gsm));
     }
 
     @Override
     public void render() {
+        float dt = Gdx.graphics.getDeltaTime();
 
         Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        playState.update();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        playState.render(shapeRenderer);
-        shapeRenderer.end();
+        gsm.update(dt);
+        gsm.render(batch, shapeRenderer);
     }
 
     @Override
     public void dispose() {
+        if (gsm != null) gsm.dispose();
+        if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
     }
 }

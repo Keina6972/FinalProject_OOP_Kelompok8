@@ -5,12 +5,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class Player extends Entity {
     private float velY = 0;
-    private final float GRAVITY = -1200.0f;
-    private final float JUMP_VELOCITY = 550.0f;
-    private final float GROUND_Y = 100.0f;
+    private static final float GRAVITY = -1200.0f;
+    private static final float JUMP_VELOCITY = 550.0f;
+    private static final float GROUND_Y = WorldConfig.GROUND_Y;
     private boolean isGrounded = false;
 
 
