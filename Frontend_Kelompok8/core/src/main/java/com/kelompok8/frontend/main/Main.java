@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.states.GameStateManager;
-import com.kelompok8.frontend.states.PlayState;
+import com.kelompok8.frontend.states.MenuState;
 
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -18,7 +18,7 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         gsm = new GameStateManager();
-        gsm.setState(new PlayState(gsm));
+        gsm.setState(new MenuState(gsm)); // Mulai dari Main Menu
     }
 
     @Override

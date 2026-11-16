@@ -9,7 +9,7 @@ public class Bullet extends Entity {
     private float damage;
 
     public Bullet(float startX, float startY, float dirX, float dirY, float damage) {
-        super(startX, startY, 8, 8, 700.0f); // Kecepatan peluru cepat
+        super(startX, startY, 8, 8, 700.0f);
         this.dirX = dirX;
         this.dirY = dirY;
         this.damage = damage;

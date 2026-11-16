@@ -52,6 +52,7 @@ public class Player extends Entity {
 
     @Override
     public void update() {
+        if (!active) return;
         float dt = Gdx.graphics.getDeltaTime();
 
 
@@ -95,6 +96,7 @@ public class Player extends Entity {
 
     // 3. Logika Menembak 8-Axis dengan Keyboard (Tombol X + Arrow Keys)
     public Bullet shoot() {
+        if (!active) return null;
         if (shootTimer <= 0 && Gdx.input.isKeyPressed(Input.Keys.X)) {
             shootTimer = shootCooldown;
 
@@ -130,7 +132,7 @@ public class Player extends Entity {
 
     @Override
     public void render(ShapeRenderer shape) {
-
+        if (!active) return;
 
         // ijin nambahin  --Baygonz
         if (invulnTimer > 0f && ((int) (invulnTimer * 10)) % 2 == 0) return;  // kedapkedip

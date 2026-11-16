@@ -38,6 +38,12 @@ public class PlayState extends GameState {
 
     @Override
     public void update(float dt) {
+        // 1. Cek State Mati Player (HP <= 0)
+        if (!player.isActive()) {
+            gsm.setState(new GameOverState(gsm));
+            return;
+        }
+
         player.update();
 
         // Panggil fungsi nembak (otomatis mengecek tombol X)
@@ -67,8 +73,17 @@ public class PlayState extends GameState {
             }
         }
 
+        boolean allEnemiesDefeated = true;
         for (Enemy enemy : enemies) {
             enemy.update();
+            if (enemy.isActive()) {
+                allEnemiesDefeated = false;
+            }
+        }
+
+        // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
+        if (allEnemiesDefeated) {
+            gsm.setState(new CardSelectState(gsm));
         }
     }
 
@@ -88,10 +103,17 @@ public class PlayState extends GameState {
             enemy.render(shape);
         }
 
+        // HUD HP Bar Player di pojok kiri atas
+        float hpRatio = Math.max(0f, player.getHp() / player.getMaxHp());
+        shape.setColor(Color.DARK_GRAY);
+        shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f, 12f);
+        shape.setColor(Color.CYAN);
+        shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f * hpRatio, 12f);
+
         // Mukhtar: Indikator Phase Boss untuk kebutuhan debugging
         if (boss != null && boss.isActive()) {
             shape.setColor(boss.getCurrentPhase() == 1 ? Color.WHITE : Color.ORANGE);
-            shape.rect(10f, Gdx.graphics.getHeight() - 20f, 100f, 8f);
+            shape.rect(10f, Gdx.graphics.getHeight() - 42f, 100f, 8f);
         }
 
         shape.end();
