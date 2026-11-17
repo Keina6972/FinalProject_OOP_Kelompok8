@@ -57,11 +57,11 @@ public abstract class Enemy extends Entity {
         shape.setColor(flashTimer > 0f ? Color.WHITE : baseColor);
         shape.rect(x, y, width, height);
 
-        //HP bar
+        //HP bar, nanti pindahin ke UI ajah
         float barY = y + height + 8f;
         shape.setColor(Color.DARK_GRAY);
         shape.rect(x, barY, width, 6f);
-        shape.setColor(Color.GREEN);
+        shape.setColor(Color.RED);
         shape.rect(x, barY, width * getHpRatio(), 6f);
     }
 

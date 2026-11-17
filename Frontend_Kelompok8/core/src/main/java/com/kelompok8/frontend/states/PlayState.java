@@ -9,6 +9,7 @@ import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.Boss;
 import com.kelompok8.frontend.entities.enemies.Enemy;
 import com.kelompok8.frontend.entities.enemies.MiniBossA;
+import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.utils.CollisionDetector;
 import com.kelompok8.frontend.utils.WorldConfig;
 
@@ -21,19 +22,21 @@ public class PlayState extends GameState {
     private final List<Bullet> bullets;
     private final List<Enemy> enemies;
     private final Boss boss;
+    private final ProjectileManager projectiles;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
         this.player = new Player(100, WorldConfig.GROUND_Y);
         this.bullets = new ArrayList<>();
         this.enemies = new ArrayList<>();
+        this.projectiles = new ProjectileManager();
 
         this.boss = new Boss("Boss", Gdx.graphics.getWidth() - 150, WorldConfig.GROUND_Y, player);
         // rizki : sementara: Boss dimatikan biar MiniBossA bisa dites sendirian (apus baris ini kalo spawn order dah jadi)
         this.boss.setActive(false);
 
         this.enemies.add(boss);
-        this.enemies.add(new MiniBossA("Miniboss A", Gdx.graphics.getWidth() - 200, WorldConfig.GROUND_Y, player));
+        this.enemies.add(new MiniBossA("Miniboss A", Gdx.graphics.getWidth() - 200, WorldConfig.GROUND_Y, player, projectiles));
     }
 
     @Override
@@ -81,6 +84,9 @@ public class PlayState extends GameState {
             }
         }
 
+        //Rizki : biar projectile musuh bergerak dan mengecek collision ke player
+        projectiles.update(player);
+
         // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
         if (allEnemiesDefeated) {
             gsm.setState(new CardSelectState(gsm));
@@ -102,6 +108,8 @@ public class PlayState extends GameState {
         for (Enemy enemy : enemies) {
             enemy.render(shape);
         }
+
+        projectiles.render(shape);
 
         // HUD HP Bar Player di pojok kiri atas
         float hpRatio = Math.max(0f, player.getHp() / player.getMaxHp());

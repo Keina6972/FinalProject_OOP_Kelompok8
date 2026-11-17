@@ -4,8 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Player;
+import com.kelompok8.frontend.entities.enemies.attacks.AimedShot;
 import com.kelompok8.frontend.entities.enemies.attacks.BossAttack;
+import com.kelompok8.frontend.entities.enemies.attacks.FireOrbAttack;
 import com.kelompok8.frontend.entities.enemies.attacks.PillarAttack;
+import com.kelompok8.frontend.entities.enemies.projectiles.LinearMovement;
+import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.entities.enemies.states.AttackState;
 import com.kelompok8.frontend.entities.enemies.states.EnemyState;
 import com.kelompok8.frontend.entities.enemies.states.IdleState;
@@ -23,14 +27,12 @@ public class MiniBossA extends Enemy {
     private int attackIndex = 0;
     private EnemyState state;   // state yang sedang aktif
 
-    public MiniBossA(String name, float x, float y, Player target) {
+    public MiniBossA(String name, float x, float y, Player target, ProjectileManager projectiles) {
         super(name, x, y, 60, 130, 600f, Color.ORANGE);   //sementara, nanti sesuaikan sprite
         this.target = target;
 
-
-        // serangan bawaan (nanti dipasang dari EntityFactory)
+        addAttack(new FireOrbAttack(projectiles, new AimedShot(target, 360f, 15f, new LinearMovement()), 0.6f, 5, 0.25f, 0.7f));
         addAttack(new PillarAttack(2, 0.8f, 0.35f, 25f));   //2 gelombang, warning 0.8s, tahan 0.35s, damage 25
-
 
         startIdle();
     }
