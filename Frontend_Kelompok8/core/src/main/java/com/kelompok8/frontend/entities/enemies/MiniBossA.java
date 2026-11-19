@@ -4,10 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Player;
-import com.kelompok8.frontend.entities.enemies.attacks.AimedShot;
-import com.kelompok8.frontend.entities.enemies.attacks.BossAttack;
-import com.kelompok8.frontend.entities.enemies.attacks.FireOrbAttack;
-import com.kelompok8.frontend.entities.enemies.attacks.PillarAttack;
+import com.kelompok8.frontend.entities.enemies.attacks.*;
 import com.kelompok8.frontend.entities.enemies.projectiles.LinearMovement;
 import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.entities.enemies.states.AttackState;
@@ -31,8 +28,9 @@ public class MiniBossA extends Enemy {
         super(name, x, y, 60, 130, 600f, Color.ORANGE);   //sementara, nanti sesuaikan sprite
         this.target = target;
 
+        addAttack(new BeamAttack(1.3f, 0.2f, 1.5f, 0.25f, 0.8f, 25f).withTracking(30f, 0.6f));;
         addAttack(new FireOrbAttack(projectiles, new AimedShot(target, 360f, 15f, new LinearMovement()), 0.6f, 5, 0.25f, 0.7f));
-        addAttack(new PillarAttack(2, 0.8f, 0.35f, 25f));   //2 gelombang, warning 0.8s, tahan 0.35s, damage 25
+        addAttack(new PillarAttack(2, 0.8f, 0.35f, 25f));
 
         startIdle();
     }
