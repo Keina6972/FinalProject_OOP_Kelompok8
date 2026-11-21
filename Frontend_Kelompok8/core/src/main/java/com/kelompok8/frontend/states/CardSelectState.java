@@ -8,34 +8,49 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.kelompok8.frontend.cards.BuffCard;
+import com.kelompok8.frontend.cards.PlayerStats;
 
 public class CardSelectState extends GameState {
     private static final int CARD_COUNT = 3;
 
+    private final PlayerStats playerStats;
+    private final BuffCard[] cardOptions = new BuffCard[CARD_COUNT];
+
     private final BitmapFont titleFont;
-    private final BitmapFont cardTitleFont;
-    private final BitmapFont cardDescFont;
+    private final BitmapFont rarityFont;
+    private final BitmapFont statFont;
+    private final BitmapFont valueFont;
     private final GlyphLayout layout;
 
     private final Rectangle[] cards = new Rectangle[CARD_COUNT];
     private int selectedCard = 1; // Default sorot kartu tengah
 
     public CardSelectState(GameStateManager gsm) {
+        this(gsm, new PlayerStats());
+    }
+
+    public CardSelectState(GameStateManager gsm, PlayerStats playerStats) {
         super(gsm);
+        this.playerStats = playerStats;
+
         this.titleFont = new BitmapFont();
         this.titleFont.getData().setScale(2.0f);
 
-        this.cardTitleFont = new BitmapFont();
-        this.cardTitleFont.getData().setScale(1.3f);
+        this.rarityFont = new BitmapFont();
+        this.rarityFont.getData().setScale(1.2f);
 
-        this.cardDescFont = new BitmapFont();
-        this.cardDescFont.getData().setScale(1.0f);
+        this.statFont = new BitmapFont();
+        this.statFont.getData().setScale(1.15f);
+
+        this.valueFont = new BitmapFont();
+        this.valueFont.getData().setScale(1.8f);
 
         this.layout = new GlyphLayout();
 
         // Hitung posisi 3 kartu agar simetris di tengah layar
-        float cardWidth = 170f;
-        float cardHeight = 240f;
+        float cardWidth = 185f;
+        float cardHeight = 250f;
         float gap = 35f;
 
         float totalWidth = (cardWidth * CARD_COUNT) + (gap * (CARD_COUNT - 1));
@@ -44,6 +59,7 @@ public class CardSelectState extends GameState {
 
         for (int i = 0; i < CARD_COUNT; i++) {
             cards[i] = new Rectangle(startX + i * (cardWidth + gap), startY, cardWidth, cardHeight);
+            cardOptions[i] = BuffCard.generateRandom();
         }
     }
 
@@ -74,9 +90,9 @@ public class CardSelectState extends GameState {
             || Gdx.input.isKeyJustPressed(Input.Keys.Z);
 
         if (clickedCard || confirmedKey) {
-            System.out.println("Kartu dipilih: Card " + (selectedCard + 1));
-            // TODO: Terapkan efek buff kartu ke Player / lanjut ke stage berikutnya
-            gsm.setState(new PlayState(gsm));
+            BuffCard chosen = cardOptions[selectedCard];
+            playerStats.applyCard(chosen);
+            gsm.setState(new PlayState(gsm, playerStats));
         }
     }
 
@@ -85,14 +101,15 @@ public class CardSelectState extends GameState {
         float screenW = Gdx.graphics.getWidth();
         float screenH = Gdx.graphics.getHeight();
 
-        // 1. Gambar Badan Kartu (Isi)
+        // 1. Gambar Badan Kartu sesuai Rarity
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < CARD_COUNT; i++) {
             Rectangle c = cards[i];
+            BuffCard.Rarity rarity = cardOptions[i].getRarity();
             boolean isSelected = (i == selectedCard);
-            float liftY = isSelected ? 12f : 0f; // Efek kartu terangkat saat dipilih
+            float liftY = isSelected ? 14f : 0f;
 
-            shape.setColor(isSelected ? new Color(0.22f, 0.25f, 0.35f, 1f) : new Color(0.14f, 0.14f, 0.18f, 1f));
+            shape.setColor(isSelected ? rarity.selectedColor : rarity.baseColor);
             shape.rect(c.x, c.y + liftY, c.width, c.height);
         }
         shape.end();
@@ -101,45 +118,60 @@ public class CardSelectState extends GameState {
         shape.begin(ShapeRenderer.ShapeType.Line);
         for (int i = 0; i < CARD_COUNT; i++) {
             Rectangle c = cards[i];
+            BuffCard.Rarity rarity = cardOptions[i].getRarity();
             boolean isSelected = (i == selectedCard);
-            float liftY = isSelected ? 12f : 0f;
+            float liftY = isSelected ? 14f : 0f;
 
-            shape.setColor(isSelected ? Color.GOLD : Color.LIGHT_GRAY);
+            shape.setColor(isSelected ? Color.GOLD : rarity.borderColor);
             shape.rect(c.x, c.y + liftY, c.width, c.height);
         }
         shape.end();
 
-        // 3. Gambar Teks Placeholder Kartu
+        // 3. Gambar Teks Rarity, Stat, dan Persentase Buff
         batch.begin();
 
         String header = "BOSS DEFEATED! CHOOSE A CARD";
         layout.setText(titleFont, header);
         titleFont.setColor(Color.GOLD);
-        titleFont.draw(batch, header, (screenW - layout.width) / 2f, screenH * 0.84f);
+        titleFont.draw(batch, header, (screenW - layout.width) / 2f, screenH * 0.85f);
 
         for (int i = 0; i < CARD_COUNT; i++) {
             Rectangle c = cards[i];
+            BuffCard card = cardOptions[i];
             boolean isSelected = (i == selectedCard);
-            float liftY = isSelected ? 12f : 0f;
+            float liftY = isSelected ? 14f : 0f;
 
-            String cardTitle = "CARD " + (i + 1);
-            layout.setText(cardTitleFont, cardTitle);
-            cardTitleFont.setColor(isSelected ? Color.GOLD : Color.WHITE);
-            cardTitleFont.draw(
+            // Label Rarity di bagian atas kartu
+            String rarityText = card.getRarity().label;
+            layout.setText(rarityFont, rarityText);
+            rarityFont.setColor(isSelected ? Color.GOLD : Color.WHITE);
+            rarityFont.draw(
                 batch,
-                cardTitle,
+                rarityText,
                 c.x + (c.width - layout.width) / 2f,
-                c.y + liftY + c.height - 25f
+                c.y + liftY + c.height - 28f
             );
 
-            String placeholder = "[ Empty Slot ]";
-            layout.setText(cardDescFont, placeholder);
-            cardDescFont.setColor(Color.GRAY);
-            cardDescFont.draw(
+            // Nilai Persentase di tengah kartu
+            String percentText = "+" + card.getBonusPercent() + "%";
+            layout.setText(valueFont, percentText);
+            valueFont.setColor(Color.WHITE);
+            valueFont.draw(
                 batch,
-                placeholder,
+                percentText,
                 c.x + (c.width - layout.width) / 2f,
-                c.y + liftY + (c.height / 2f)
+                c.y + liftY + (c.height * 0.56f)
+            );
+
+            // Nama Stat di bagian bawah kartu
+            String statText = card.getStatType().displayName;
+            layout.setText(statFont, statText);
+            statFont.setColor(Color.LIGHT_GRAY);
+            statFont.draw(
+                batch,
+                statText,
+                c.x + (c.width - layout.width) / 2f,
+                c.y + liftY + (c.height * 0.34f)
             );
         }
 
@@ -149,7 +181,8 @@ public class CardSelectState extends GameState {
     @Override
     public void dispose() {
         titleFont.dispose();
-        cardTitleFont.dispose();
-        cardDescFont.dispose();
+        rarityFont.dispose();
+        statFont.dispose();
+        valueFont.dispose();
     }
 }

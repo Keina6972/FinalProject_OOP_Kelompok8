@@ -12,6 +12,7 @@ import com.kelompok8.frontend.entities.enemies.MiniBossA;
 import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.utils.CollisionDetector;
 import com.kelompok8.frontend.utils.WorldConfig;
+import com.kelompok8.frontend.cards.PlayerStats;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,7 +20,8 @@ import java.util.List;
 
 public class PlayState extends GameState {
     private static final float BOSS_CONTACT_DAMAGE = 10f;
-
+    // Faisal : menambahkan stat baru pada player
+    private final PlayerStats playerStats;
     private final Player player;
     private final List<Bullet> bullets;
     private final List<Enemy> enemies;
@@ -27,8 +29,13 @@ public class PlayState extends GameState {
     private final ProjectileManager projectiles;
 
     public PlayState(GameStateManager gsm) {
+        this(gsm, new PlayerStats());
+    }
+
+    public PlayState(GameStateManager gsm, PlayerStats playerStats) {
         super(gsm);
-        this.player = new Player(100, WorldConfig.GROUND_Y);
+        this.playerStats = playerStats;
+        this.player = new Player(100, WorldConfig.GROUND_Y, playerStats);
         this.bullets = new ArrayList<>();
         this.enemies = new ArrayList<>();
         this.projectiles = new ProjectileManager();
@@ -92,7 +99,7 @@ public class PlayState extends GameState {
 
         // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
         if (allEnemiesDefeated) {
-            gsm.setState(new CardSelectState(gsm));
+            gsm.setState(new CardSelectState(gsm, playerStats));
         }
     }
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.kelompok8.frontend.cards.PlayerStats;
 import com.kelompok8.frontend.utils.WorldConfig;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class Player extends Entity {
     private static final float GRAVITY = -1200.0f;
     private static final float JUMP_VELOCITY = 550.0f;
     private static final float GROUND_Y = WorldConfig.GROUND_Y;
+    private static final float BASE_MOVE_SPEED = 300.0f;
     private boolean isGrounded = false;
 
     // ijin nambahin  --Baygonz
@@ -38,15 +40,26 @@ public class Player extends Entity {
     private static final float LINEAR_DAMAGE = 10f;
 
     private static final float SPREAD_COOLDOWN = 0.22f;
-    private static final float SPREAD_DAMAGE = 10f;
+    private static final float SPREAD_DAMAGE = 6f;
     private static final float SPREAD_RANGE = 260f;
     private static final float SPREAD_ANGLE = 15f;
-
+    // faisal : menambah stats untuk menyimpan buff yang aktif
+    private final PlayerStats stats;
     private WeaponType currentWeapon = WeaponType.LINEAR;
     private float shootTimer = 0;
 
     public Player(float x, float y) {
-        super(x, y, 32, 48, 300.0f);
+        this(x, y, new PlayerStats());
+    }
+
+    public Player(float x, float y, PlayerStats stats) {
+        super(x, y, 32, 48, BASE_MOVE_SPEED);
+        this.stats = stats;
+        syncStats();
+    }
+
+    public void syncStats() {
+        this.speed = BASE_MOVE_SPEED * stats.getMoveSpeedMultiplier();
     }
 
     // ijin nambahin  --Baygonz
@@ -141,11 +154,14 @@ public class Player extends Entity {
             float bulletStartX = x + width / 2f - 4;
             float bulletStartY = y + height / 2f - 4;
 
+            float dmgMult = stats.getDamageMultiplier();
+            float aspdMult = stats.getAttackSpeedMultiplier();
+
             if (currentWeapon == WeaponType.LINEAR) {
-                shootTimer = LINEAR_COOLDOWN;
-                bullets.add(new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, LINEAR_DAMAGE, Color.YELLOW, -1f));
+                shootTimer = LINEAR_COOLDOWN / aspdMult;
+                bullets.add(new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, LINEAR_DAMAGE * dmgMult, Color.YELLOW, -1f));
             } else {
-                shootTimer = SPREAD_COOLDOWN;
+                shootTimer = SPREAD_COOLDOWN / aspdMult;
                 float baseAngle = dir.angleDeg();
                 float[] angleOffsets = {-SPREAD_ANGLE, 0f, SPREAD_ANGLE};
 
@@ -153,7 +169,7 @@ public class Player extends Entity {
                     float angle = baseAngle + offset;
                     float spreadX = MathUtils.cosDeg(angle);
                     float spreadY = MathUtils.sinDeg(angle);
-                    bullets.add(new Bullet(bulletStartX, bulletStartY, spreadX, spreadY, SPREAD_DAMAGE, Color.RED, SPREAD_RANGE));
+                    bullets.add(new Bullet(bulletStartX, bulletStartY, spreadX, spreadY, SPREAD_DAMAGE * dmgMult, Color.RED, SPREAD_RANGE));
                 }
             }
         }
