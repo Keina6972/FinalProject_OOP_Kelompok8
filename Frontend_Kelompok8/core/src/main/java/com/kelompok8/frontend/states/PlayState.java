@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class PlayState extends GameState {
+    private static final float BOSS_CONTACT_DAMAGE = 10f;
+
     private final Player player;
     private final List<Bullet> bullets;
     private final List<Enemy> enemies;
@@ -81,6 +83,10 @@ public class PlayState extends GameState {
             enemy.update();
             if (enemy.isActive()) {
                 allEnemiesDefeated = false;
+
+                if (CollisionDetector.checkCollision(player, enemy)) {
+                    player.takeDamage(BOSS_CONTACT_DAMAGE);
+                }
             }
         }
 
@@ -129,5 +135,6 @@ public class PlayState extends GameState {
 
     @Override
     public void dispose() {
+        projectiles.clear();
     }
 }

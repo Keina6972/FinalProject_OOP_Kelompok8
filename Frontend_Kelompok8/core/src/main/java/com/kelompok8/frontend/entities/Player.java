@@ -44,6 +44,7 @@ public class Player extends Entity {
         System.out.println("Player HP: " + hp);
         if (hp <= 0f) { hp = 0f; active = false; }
     }
+
     public float getHp() { return hp; }
     public float getMaxHp() { return maxHp; }
     public boolean isInvulnerable() { return invulnTimer > 0f; }
