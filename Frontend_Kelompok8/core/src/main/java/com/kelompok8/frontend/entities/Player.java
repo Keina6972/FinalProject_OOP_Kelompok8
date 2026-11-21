@@ -26,8 +26,8 @@ public class Player extends Entity {
 
     // ijin nambahin  --Baygonz
     // HP player dan invulnerable
-    private float hp = 100f;
-    private final float maxHp = 100f;
+    private float hp;
+    private final float maxHp;
     private float invulnTimer = 0f;
     private static final float INVULN_DURATION = 1.0f;
     // ijin nambahin  --Baygonz
@@ -55,6 +55,8 @@ public class Player extends Entity {
     public Player(float x, float y, PlayerStats stats) {
         super(x, y, 32, 48, BASE_MOVE_SPEED);
         this.stats = stats;
+        this.maxHp = stats.getMaxHp();
+        this.hp = stats.getCurrentHp();
         syncStats();
     }
 
@@ -68,6 +70,7 @@ public class Player extends Entity {
         if (invulnTimer > 0f || !active) return;
         hp -= damage;
         invulnTimer = INVULN_DURATION;
+        stats.setCurrentHp(hp);
         System.out.println("Player HP: " + hp);
         if (hp <= 0f) { hp = 0f; active = false; }
     }
