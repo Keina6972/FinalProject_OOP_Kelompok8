@@ -69,10 +69,7 @@ public class PillarAttack implements BossAttack {
             float shift = (w % 2 == 1) ? SPACING / 2f : 0f;   // gelombang ganjil digeser setengah jarak
             float delay = w * WAVE_INTERVAL;
             for (float x = baseOffset + shift - SPACING; x < Gdx.graphics.getWidth() + SPACING; x += SPACING) {
-                // pilar harus cukup jauh dari kedua dinding (kalo ngga, celah di tepi terlalu sempit)
-                if (x - PILLAR_WIDTH / 2f >= EDGE_MARGIN && x + PILLAR_WIDTH / 2f <= Gdx.graphics.getWidth() - EDGE_MARGIN) {
-                    pillars.add(new Pillar(x, delay));
-                }
+                pillars.add(new Pillar(x, delay));
             }
         }
     }

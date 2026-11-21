@@ -2,38 +2,48 @@ package com.kelompok8.frontend.entities.enemies.attacks;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.Enemy;
 import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
+import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileMovement;
 
-// rizki:
+// ntar ganti, CAST = fire_orb_form, orb terbang = fire_orb_fly, kena = fire_orb_impact (nanti diganti sprite)
+
 public class FireOrbAttack implements BossAttack {
     private enum Phase { CAST, FIRE, RECOVERY, DONE }
 
-    private static final float MUZZLE_GAP = 22f; // jarak titik tembak dari sisi depan boss
-    private static final float MUZZLE_HEIGHT = 0.62f; // tinggi titik tembak (0-1 dari tinggi boss)
+    private static final float MUZZLE_GAP = 22f;      // jarak titik tembak dari sisi depan boss
+    private static final float MUZZLE_HEIGHT = 0.62f; // tinggi titik tembak (0..1 dari tinggi boss)
 
     private final ProjectileManager manager;
-    private final ShootingPattern pattern;   // cara nembak (di-inject)
+    private final ProjectileMovement movement;   // gerakan orb (di-inject, sekarang LinearMovement)
+    private final int shotCount;                 // jumlah tembakan per serangan
+    private final float maxOffset;               // batas sudut random
     private final float castTime, shotInterval, recoveryTime;
-    private final int shots;
+    private final float speed, damage;
 
     private Phase phase = Phase.DONE;
     private float timer;
     private float shotTimer;
-    private int shotsFired;
+    private int shotIndex;
+    private float lockedAngle;
     private boolean facingRight;
     private Enemy owner;
     private Player target;
 
-    public FireOrbAttack(ProjectileManager manager, ShootingPattern pattern, float castTime, int shots, float shotInterval, float recoveryTime) {
+    public FireOrbAttack(ProjectileManager manager, ProjectileMovement movement, int shotCount, float maxOffset,
+                         float castTime, float shotInterval, float recoveryTime, float speed, float damage) {
         this.manager = manager;
-        this.pattern = pattern;
+        this.movement = movement;
+        this.shotCount = Math.max(1, shotCount);
+        this.maxOffset = Math.abs(maxOffset);
         this.castTime = castTime;
-        this.shots = Math.max(1, shots);
         this.shotInterval = shotInterval;
         this.recoveryTime = recoveryTime;
+        this.speed = speed;
+        this.damage = damage;
     }
 
     @Override
@@ -42,17 +52,17 @@ public class FireOrbAttack implements BossAttack {
         this.target = target;
         phase = Phase.CAST;
         timer = castTime;
-        shotsFired = 0;
+        shotIndex = 0;
         updateFacing();
     }
 
     @Override
     public void update(float dt) {
         if (phase == Phase.DONE) return;
-        updateFacing(); // titik tembak ada di sisi yang menghadap player
 
         switch (phase) {
             case CAST:
+                updateFacing(); // selama casting titik tembak ada di sisi yang menghadap player
                 timer -= dt;
                 if (timer <= 0f) {
                     phase = Phase.FIRE;
@@ -61,12 +71,17 @@ public class FireOrbAttack implements BossAttack {
                 break;
             case FIRE:
                 shotTimer -= dt;
-                while (shotTimer <= 0f && shotsFired < shots) {
-                    pattern.execute(muzzleX(), muzzleY(), manager); // tiap tembakan ngunci posisi player saat ini
-                    shotsFired++;
+                while (shotTimer <= 0f && shotIndex < shotCount) {
+                    if (shotIndex == 0) {
+                        updateFacing();                // sisi tembak terakhir dikunci di sini
+                        lockedAngle = angleToTarget(); // arah dikunci ke posisi player SEKARANG
+                    }
+                    float randomOffset = MathUtils.random(-maxOffset, maxOffset); // arah tembakan random
+                    fireShot(randomOffset);
+                    shotIndex++;
                     shotTimer += shotInterval;
                 }
-                if (shotsFired >= shots) {
+                if (shotIndex >= shotCount) {
                     phase = Phase.RECOVERY;
                     timer = recoveryTime;
                 }
@@ -78,6 +93,19 @@ public class FireOrbAttack implements BossAttack {
             default:
                 break;
         }
+    }
+
+    private void fireShot(float offset) {
+        // offset positif selalu ke atas: kalau boss menghadap kiri, putarannya dibalik
+        float angle = lockedAngle + (facingRight ? offset : -offset);
+        float rad = (float) Math.toRadians(angle);
+        manager.spawnFireOrb(muzzleX(), muzzleY(),
+            (float) Math.cos(rad) * speed, (float) Math.sin(rad) * speed, damage, movement);
+    }
+
+    // sudut dari titik tembak ke tengah badan player
+    private float angleToTarget() {
+        return (float) Math.toDegrees(Math.atan2(target.getCenterY() - muzzleY(), target.getCenterX() - muzzleX()));
     }
 
     private void updateFacing() {
@@ -101,7 +129,6 @@ public class FireOrbAttack implements BossAttack {
     public void render(ShapeRenderer shape) {
         if (phase != Phase.CAST && phase != Phase.FIRE) return;
 
-        //ntar ganti fire_orb_form
         shape.setColor(Color.ORANGE);
         shape.circle(muzzleX(), muzzleY(), 10f);
     }

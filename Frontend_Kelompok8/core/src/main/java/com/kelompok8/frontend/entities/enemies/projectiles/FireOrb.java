@@ -18,7 +18,12 @@ public class FireOrb extends Entity {
     private ProjectileMovement movement;
 
     public FireOrb() {
-        super(0, 0, SIZE, SIZE, 0);
+        this(SIZE, SIZE);
+    }
+
+    // dipakai turunan (misal MagicCircle) yang ukurannya beda
+    protected FireOrb(float width, float height) {
+        super(0, 0, width, height, 0);
         this.active = false; // belum dipakai (masih di pool)
     }
 

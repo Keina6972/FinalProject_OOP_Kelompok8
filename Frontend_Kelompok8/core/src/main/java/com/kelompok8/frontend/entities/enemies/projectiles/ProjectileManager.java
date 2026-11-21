@@ -17,12 +17,23 @@ public class ProjectileManager {
     private final Deque<FireOrb> pool = new ArrayDeque<>();
     private final List<FireOrb> active = new ArrayList<>();
 
+    private final Deque<MagicCircle> magicPool = new ArrayDeque<>();
+    private final List<MagicCircle> magicActive = new ArrayList<>();
+
     // ambil orb dari pool (kalau kosong baru bikin baru)
     public FireOrb spawnFireOrb(float x, float y, float vx, float vy, float damage, ProjectileMovement movement) {
         FireOrb orb = pool.isEmpty() ? new FireOrb() : pool.pop();
         orb.init(x, y, vx, vy, damage, movement);
         active.add(orb);
         return orb;
+    }
+
+    // ambil magic circle dari pool (kalau kosong baru bikin baru)
+    public MagicCircle spawnMagicCircle(float x, float y, float vx, float vy, float damage, ProjectileMovement movement) {
+        MagicCircle circle = magicPool.isEmpty() ? new MagicCircle() : magicPool.pop();
+        circle.init(x, y, vx, vy, damage, movement);
+        magicActive.add(circle);
+        return circle;
     }
 
     // update semua orb + cek tabrakan dengan player
@@ -51,10 +62,33 @@ public class ProjectileManager {
                 pool.push(orb); // balik ke pool
             }
         }
+
+        Iterator<MagicCircle> mit = magicActive.iterator();
+        while (mit.hasNext()) {
+            MagicCircle circle = mit.next();
+            circle.update();
+
+            if (circle.isFlying()) {
+                if (target != null && CollisionDetector.checkCollision(circle, target)) {
+                    target.takeDamage(circle.getDamage()); // kena player = damage + impact
+                    circle.impact();
+                } else if (circle.touchesGround()) {
+                    circle.impact(); // kena lantai = impact aja
+                } else if (circle.isOffScreen(w, h)) {
+                    circle.deactivate(); // keluar layar -> hilang
+                }
+            }
+
+            if (!circle.isActive()) {
+                mit.remove();
+                magicPool.push(circle); // balik ke pool
+            }
+        }
     }
 
     public void render(ShapeRenderer shape) {
         for (FireOrb orb : active) orb.render(shape);
+        for (MagicCircle circle : magicActive) circle.render(shape);
     }
 
     // buang semua orb (misal ganti state)
@@ -64,6 +98,12 @@ public class ProjectileManager {
             pool.push(orb);
         }
         active.clear();
+
+        for (MagicCircle circle : magicActive) {
+            circle.deactivate();
+            magicPool.push(circle);
+        }
+        magicActive.clear();
     }
 
     public int getActiveCount() { return active.size(); }

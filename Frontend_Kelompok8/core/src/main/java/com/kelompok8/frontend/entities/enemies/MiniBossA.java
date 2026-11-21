@@ -25,11 +25,12 @@ public class MiniBossA extends Enemy {
     private EnemyState state;   // state yang sedang aktif
 
     public MiniBossA(String name, float x, float y, Player target, ProjectileManager projectiles) {
-        super(name, x, y, 60, 130, 600f, Color.ORANGE);   //sementara, nanti sesuaikan sprite
+        super(name, x, y, 60, 130, 600f, Color.ORANGE); // sementara
         this.target = target;
 
-        addAttack(new BeamAttack(1.3f, 0.2f, 1.5f, 0.25f, 0.8f, 25f).withTracking(30f, 0.6f));;
-        addAttack(new FireOrbAttack(projectiles, new AimedShot(target, 360f, 15f, new LinearMovement()), 0.6f, 5, 0.25f, 0.7f));
+        addAttack(new BeamAttack(1.0f, 0.1f, 1.0f, 0.1f, 0.8f, 25f).withTracking(60f, 0.6f));
+        addAttack(new FireOrbAttack(projectiles, new LinearMovement(), 15, 30f, 0.8f, 0.03f, 0.5f, 450f, 12f));
+        addAttack(new MagicCircleAttack(projectiles, new MagicCircleShot(target, 360f, 15f, new LinearMovement()), 0.6f, 5, 0.5f, 0.7f));
         addAttack(new PillarAttack(2, 0.8f, 0.35f, 25f));
 
         startIdle();
