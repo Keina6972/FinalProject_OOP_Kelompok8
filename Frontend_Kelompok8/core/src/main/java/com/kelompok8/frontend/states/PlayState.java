@@ -51,11 +51,8 @@ public class PlayState extends GameState {
 
         player.update();
 
-        // Panggil fungsi nembak (otomatis mengecek tombol X)
-        Bullet b = player.shoot();
-        if (b != null) {
-            bullets.add(b);
-        }
+        // Panggil fungsi nembak (otomatis mengecek tombol X dan senjata aktif)
+        player.shoot(bullets);
 
         // Update Peluru & Collision Check ke seluruh Enemy secara polimorfik
         Iterator<Bullet> it = bullets.iterator();
@@ -90,7 +87,7 @@ public class PlayState extends GameState {
             }
         }
 
-        //Rizki : biar projectile musuh bergerak dan mengecek collision ke player
+        // Rizki : biar projectile musuh bergerak dan mengecek collision ke player
         projectiles.update(player);
 
         // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
@@ -123,6 +120,10 @@ public class PlayState extends GameState {
         shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f, 12f);
         shape.setColor(Color.CYAN);
         shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f * hpRatio, 12f);
+
+        // Indikator Senjata Aktif di sebelah HP Bar (Kuning = Linear, Merah = Spread)
+        shape.setColor(player.getCurrentWeapon() == Player.WeaponType.LINEAR ? Color.YELLOW : Color.RED);
+        shape.rect(178f, Gdx.graphics.getHeight() - 25f, 22f, 12f);
 
         // Mukhtar: Indikator Phase Boss untuk kebutuhan debugging
         if (boss != null && boss.isActive()) {

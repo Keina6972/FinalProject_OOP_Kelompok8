@@ -4,39 +4,53 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.kelompok8.frontend.utils.WorldConfig;
 
+import java.util.List;
+
 public class Player extends Entity {
+    public enum WeaponType {
+        LINEAR,
+        SPREAD
+    }
+
     private float velY = 0;
     private static final float GRAVITY = -1200.0f;
     private static final float JUMP_VELOCITY = 550.0f;
     private static final float GROUND_Y = WorldConfig.GROUND_Y;
     private boolean isGrounded = false;
 
-
     // ijin nambahin  --Baygonz
-    //HP player dan invulnerable
+    // HP player dan invulnerable
     private float hp = 100f;
     private final float maxHp = 100f;
     private float invulnTimer = 0f;
     private static final float INVULN_DURATION = 1.0f;
     // ijin nambahin  --Baygonz
 
-
     // Status Arah Menghadap (Default Kanan)
     private boolean facingRight = true;
 
-    private float shootCooldown = 0.15f;
+    // Konfigurasi Senjata
+    private static final float LINEAR_COOLDOWN = 0.15f;
+    private static final float LINEAR_DAMAGE = 10f;
+
+    private static final float SPREAD_COOLDOWN = 0.22f;
+    private static final float SPREAD_DAMAGE = 10f;
+    private static final float SPREAD_RANGE = 260f;
+    private static final float SPREAD_ANGLE = 15f;
+
+    private WeaponType currentWeapon = WeaponType.LINEAR;
     private float shootTimer = 0;
 
     public Player(float x, float y) {
         super(x, y, 32, 48, 300.0f);
     }
 
-
     // ijin nambahin  --Baygonz
-    //kebal saat kena damage
+    // kebal saat kena damage
     public void takeDamage(float damage) {
         if (invulnTimer > 0f || !active) return;
         hp -= damage;
@@ -44,23 +58,26 @@ public class Player extends Entity {
         System.out.println("Player HP: " + hp);
         if (hp <= 0f) { hp = 0f; active = false; }
     }
-
     public float getHp() { return hp; }
     public float getMaxHp() { return maxHp; }
     public boolean isInvulnerable() { return invulnTimer > 0f; }
     // ijin nambahin  --Baygonz
-
 
     @Override
     public void update() {
         if (!active) return;
         float dt = Gdx.graphics.getDeltaTime();
 
-
         // ijin nambahin  --Baygonz
         if (invulnTimer > 0f) invulnTimer -= dt;
         // ijin nambahin  --Baygonz
 
+        // Ganti senjata pakai tombol TAB
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            currentWeapon = (currentWeapon == WeaponType.LINEAR)
+                ? WeaponType.SPREAD
+                : WeaponType.LINEAR;
+        }
 
         // 1. Horizontal Movement & Facing Logic (Arrow Left / Right)
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -96,11 +113,9 @@ public class Player extends Entity {
     }
 
     // 3. Logika Menembak 8-Axis dengan Keyboard (Tombol X + Arrow Keys)
-    public Bullet shoot() {
-        if (!active) return null;
+    public void shoot(List<Bullet> bullets) {
+        if (!active) return;
         if (shootTimer <= 0 && Gdx.input.isKeyPressed(Input.Keys.X)) {
-            shootTimer = shootCooldown;
-
             float dirX = 0;
             float dirY = 0;
 
@@ -126,9 +141,26 @@ public class Player extends Entity {
             float bulletStartX = x + width / 2f - 4;
             float bulletStartY = y + height / 2f - 4;
 
-            return new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, 10);
+            if (currentWeapon == WeaponType.LINEAR) {
+                shootTimer = LINEAR_COOLDOWN;
+                bullets.add(new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, LINEAR_DAMAGE, Color.YELLOW, -1f));
+            } else {
+                shootTimer = SPREAD_COOLDOWN;
+                float baseAngle = dir.angleDeg();
+                float[] angleOffsets = {-SPREAD_ANGLE, 0f, SPREAD_ANGLE};
+
+                for (float offset : angleOffsets) {
+                    float angle = baseAngle + offset;
+                    float spreadX = MathUtils.cosDeg(angle);
+                    float spreadY = MathUtils.sinDeg(angle);
+                    bullets.add(new Bullet(bulletStartX, bulletStartY, spreadX, spreadY, SPREAD_DAMAGE, Color.RED, SPREAD_RANGE));
+                }
+            }
         }
-        return null;
+    }
+
+    public WeaponType getCurrentWeapon() {
+        return currentWeapon;
     }
 
     @Override
@@ -138,7 +170,6 @@ public class Player extends Entity {
         // ijin nambahin  --Baygonz
         if (invulnTimer > 0f && ((int) (invulnTimer * 10)) % 2 == 0) return;  // kedapkedip
         // ijin nambahin  --Baygonz
-
 
         shape.setColor(Color.CYAN);
         shape.rect(x, y, width, height);
