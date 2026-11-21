@@ -89,7 +89,7 @@ public class MenuState extends GameState {
             playButtonBounds.y + (playButtonBounds.height + layout.height) / 2f
         );
 
-        String controls = "Arrow Keys: Move / Aim   |   Z: Jump   |   X: Shoot";
+        String controls = "Arrow Keys: Move / Aim   |   Z: Jump   |   X: Shoot   |   Tab: Change Attack";
         layout.setText(infoFont, controls);
         infoFont.setColor(Color.LIGHT_GRAY);
         infoFont.draw(batch, controls, (screenW - layout.width) / 2f, screenH * 0.22f);
