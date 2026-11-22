@@ -9,4 +9,5 @@ public interface BossMovement {
     void start(Enemy owner, Player target);
     void update(float dt);
     boolean isFinished();
+    MovementType getType();
 }
