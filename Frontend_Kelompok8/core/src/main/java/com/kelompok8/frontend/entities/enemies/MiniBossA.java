@@ -5,11 +5,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.attacks.*;
+import com.kelompok8.frontend.entities.enemies.movements.BossMovement;
+import com.kelompok8.frontend.entities.enemies.movements.RangeMovementPlanner;
 import com.kelompok8.frontend.entities.enemies.projectiles.LinearMovement;
 import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.entities.enemies.states.AttackState;
 import com.kelompok8.frontend.entities.enemies.states.EnemyState;
 import com.kelompok8.frontend.entities.enemies.states.IdleState;
+import com.kelompok8.frontend.entities.enemies.states.MoveState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,8 @@ public class MiniBossA extends Enemy {
     private final List<BossAttack> attacks = new ArrayList<>();
     private int attackIndex = 0;
     private EnemyState state;   // state yang sedang aktif
+    private final RangeMovementPlanner movementPlanner = new RangeMovementPlanner(); //aturan kapan jalan/dash
+    private boolean facingRight; // menghadap player (buat flip sprite nanti)
 
     public MiniBossA(String name, float x, float y, Player target, ProjectileManager projectiles) {
         super(name, x, y, 60, 130, 600f, Color.ORANGE); // sementara
@@ -46,8 +51,13 @@ public class MiniBossA extends Enemy {
         changeState(new IdleState(IDLE_TIME));
     }
 
+    // gerak dulu (jalan / dash) kalau planner bilang perlu, baru nyerang
     public void startNextAttack() {
         changeState(new AttackState(nextAttack()));
+        BossAttack attack = nextAttack();
+        BossMovement movement = movementPlanner.next(this, target);
+        if (movement == null) changeState(new AttackState(attack));
+        else changeState(new MoveState(movement, attack));
     }
 
     // rizki : Strategy: daftar serangan
@@ -64,6 +74,7 @@ public class MiniBossA extends Enemy {
 
     @Override
     protected void updateBehavior() {
+        facingRight = target.getCenterX() >= getCenterX();
         state.update(this, Gdx.graphics.getDeltaTime());
     }
 
@@ -74,4 +85,5 @@ public class MiniBossA extends Enemy {
     }
 
     public Player getTarget() { return target; }
+    public boolean isFacingRight() { return facingRight; }
 }
