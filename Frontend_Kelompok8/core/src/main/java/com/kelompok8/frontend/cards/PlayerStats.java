@@ -1,7 +1,7 @@
 package com.kelompok8.frontend.cards;
 
 public class PlayerStats {
-    private float maxHp = 100f;
+    private final float maxHp = 100f;
     private float currentHp = 100f;
 
     private float damageMultiplier = 1.0f;

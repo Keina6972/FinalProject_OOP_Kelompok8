@@ -33,7 +33,7 @@ public class Bullet extends Entity {
         x += moveX;
         y += moveY;
 
-        // Auto hapus jika melewati batas jarak senjata (khusus senjata jarak pendek seperti Spread)
+        // Auto hapus jika melewati batas jarak senjata
         if (maxRange > 0f) {
             distanceTraveled += (float) Math.hypot(moveX, moveY);
             if (distanceTraveled >= maxRange) {

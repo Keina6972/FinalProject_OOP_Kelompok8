@@ -33,6 +33,7 @@ public class PlayState extends GameState {
     }
 
     public PlayState(GameStateManager gsm, PlayerStats playerStats) {
+        // setup semua yang akan digunakan pada saat main
         super(gsm);
         this.playerStats = playerStats;
         this.player = new Player(100, WorldConfig.GROUND_Y, playerStats);
@@ -87,7 +88,7 @@ public class PlayState extends GameState {
             enemy.update();
             if (enemy.isActive()) {
                 allEnemiesDefeated = false;
-
+                // kalau kolisi dengan boss maka kena damage 10hp
                 if (CollisionDetector.checkCollision(player, enemy)) {
                     player.takeDamage(BOSS_CONTACT_DAMAGE);
                 }
@@ -97,7 +98,7 @@ public class PlayState extends GameState {
         // Rizki : biar projectile musuh bergerak dan mengecek collision ke player
         projectiles.update(player);
 
-        // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
+        // 2. Cek Jika Boss agar Pindah ke Tampilan Pilih 3 Kartu
         if (allEnemiesDefeated) {
             gsm.setState(new CardSelectState(gsm, playerStats));
         }
@@ -107,7 +108,7 @@ public class PlayState extends GameState {
     public void render(SpriteBatch batch, ShapeRenderer shape) {
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Gambarkan Lantai Arena (Ground)
+        // ground arena
         shape.setColor(Color.GRAY);
         shape.rect(0, 0, Gdx.graphics.getWidth(), WorldConfig.GROUND_Y);
 
@@ -128,7 +129,7 @@ public class PlayState extends GameState {
         shape.setColor(Color.CYAN);
         shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f * hpRatio, 12f);
 
-        // Indikator Senjata Aktif di sebelah HP Bar (Kuning = Linear, Merah = Spread)
+        // Active weapon (kuning = linear, merah = spread)
         shape.setColor(player.getCurrentWeapon() == Player.WeaponType.LINEAR ? Color.YELLOW : Color.RED);
         shape.rect(178f, Gdx.graphics.getHeight() - 25f, 22f, 12f);
 
