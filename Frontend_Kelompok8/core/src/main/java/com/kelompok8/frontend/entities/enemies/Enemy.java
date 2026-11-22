@@ -65,6 +65,7 @@ public abstract class Enemy extends Entity {
         shape.rect(x, barY, width * getHpRatio(), 6f);
     }
 
+    public void setX(float x) { this.x = x; }
     public boolean isAlive() { return hp > 0f; }
     public String getName() { return name; }
     public float getHp() { return hp; }
