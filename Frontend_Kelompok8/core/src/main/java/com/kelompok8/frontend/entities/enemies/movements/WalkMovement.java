@@ -48,4 +48,7 @@ public class WalkMovement implements BossMovement {
 
     @Override
     public boolean isFinished() { return finished; }
+
+    @Override
+    public MovementType getType() { return towardPlayer ? MovementType.WALK_TOWARD : MovementType.WALK_AWAY; }
 }

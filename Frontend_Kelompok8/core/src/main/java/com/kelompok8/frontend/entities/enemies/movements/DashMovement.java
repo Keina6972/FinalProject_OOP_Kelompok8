@@ -81,4 +81,7 @@ public class DashMovement implements BossMovement {
 
     @Override
     public boolean isFinished() { return phase == Phase.DONE; }
+
+    @Override
+    public MovementType getType() { return direction == Direction.FORWARD ? MovementType.DASH_FORWARD : MovementType.DASH_BACKWARD; }
 }

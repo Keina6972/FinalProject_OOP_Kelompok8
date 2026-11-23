@@ -10,8 +10,8 @@ import com.kelompok8.frontend.entities.enemies.Enemy;
 // sedang                    : jalan mendekat 35%, jalan menjauh 35%, diam 30%
 // Mengembalikan null kalau boss sebaiknya diam (langsung nyerang).
 public class RangeMovementPlanner {
-    private static final float FAR_GAP = 220f;
-    private static final float CLOSE_GAP = 110f;
+    public static final float FAR_GAP = 220f;
+    public static final float CLOSE_GAP = 110f;
     private static final float MIN_GAP = 60f;       // boss ga akan gerak sendiri sampai lebih dekat dari ini
     private static final float MIN_ROOM_BACK = 60f; // butuh ruang segini di belakang boss buat mundur
 
@@ -36,11 +36,19 @@ public class RangeMovementPlanner {
         }
         if (gap < CLOSE_GAP) {
             if (!roomBack) return null;   // kepepet dinding, ga bisa mundur
-            return roll < 0.55f ? dash(DashMovement.Direction.BACKWARD) : walk(false);
+            if (roll < 0.15f) return dash(DashMovement.Direction.BACKWARD);
+            if (roll < 0.35f) return walk(false);
+            return null;
         }
         if (roll < 0.35f) return walk(true);
         if (roll < 0.70f && roomBack) return walk(false);
         return null;
+    }
+
+    public BossMovement dashBackIfPossible(Enemy owner, Player target) {
+        float awayDir = -MovementMath.dirToTarget(owner, target);
+        if (MovementMath.room(owner, awayDir) < MIN_ROOM_BACK) return null;
+        return dash(DashMovement.Direction.BACKWARD);
     }
 
     private BossMovement walk(boolean toward) {

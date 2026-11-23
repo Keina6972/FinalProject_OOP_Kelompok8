@@ -8,11 +8,12 @@ import com.kelompok8.frontend.entities.enemies.movements.BossMovement;
 // Menjalankan satu gerakan (jalan/dash) sampai selesai, lalu lanjut ke serangan yang udah dipilih
 public class MoveState implements EnemyState {
     private final BossMovement movement;
-    private final BossAttack nextAttack;
+    private final float pause;    // total jeda (gerakan dihitung di dalamnya)
+    private float elapsed = 0f;
 
-    public MoveState(BossMovement movement, BossAttack nextAttack) {
+    public MoveState(BossMovement movement, float pause) {
         this.movement = movement;
-        this.nextAttack = nextAttack;
+        this.pause = pause;
     }
 
     @Override
@@ -22,8 +23,13 @@ public class MoveState implements EnemyState {
 
     @Override
     public void update(MiniBossA owner, float dt) {
+        elapsed += dt;
         movement.update(dt);
-        if (movement.isFinished()) owner.changeState(new AttackState(nextAttack));
+        if (movement.isFinished()) {
+            float remaining = pause - elapsed;
+            if (remaining > 0f) owner.changeState(new IdleState(remaining));
+            else owner.startNextAttack();
+        }
     }
 
     @Override
