@@ -32,6 +32,17 @@ public class Player extends Entity {
     private static final float INVULN_DURATION = 1.0f;
     // ijin nambahin  --Baygonz
 
+    // Konfigurasi Dash / Dodge
+    private static final float DASH_SPEED = 700.0f;
+    private static final float DASH_DURATION = 0.16f;
+    private static final float DASH_COOLDOWN = 0.6f;
+
+    private boolean isDashing = false;
+    private float dashTimer = 0f;
+    private float dashCooldownTimer = 0f;
+    private int dashDir = 1;
+    private boolean canAirDash = true;
+
     // Status Arah Menghadap (Default Kanan)
     private boolean facingRight = true;
 
@@ -67,7 +78,7 @@ public class Player extends Entity {
     // ijin nambahin  --Baygonz
     // kebal saat kena damage
     public void takeDamage(float damage) {
-        if (invulnTimer > 0f || !active) return;
+        if (isInvulnerable() || !active) return;
         hp -= damage;
         invulnTimer = INVULN_DURATION;
         stats.setCurrentHp(hp);
@@ -76,7 +87,8 @@ public class Player extends Entity {
     }
     public float getHp() { return hp; }
     public float getMaxHp() { return maxHp; }
-    public boolean isInvulnerable() { return invulnTimer > 0f; }
+    public boolean isInvulnerable() { return invulnTimer > 0f || isDashing; }
+    public boolean isDashing() { return isDashing; }
     // ijin nambahin  --Baygonz
 
     @Override
@@ -88,6 +100,8 @@ public class Player extends Entity {
         if (invulnTimer > 0f) invulnTimer -= dt;
         // ijin nambahin  --Baygonz
 
+        if (dashCooldownTimer > 0f) dashCooldownTimer -= dt;
+
         // Ganti senjata pakai tombol TAB
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             currentWeapon = (currentWeapon == WeaponType.LINEAR)
@@ -95,30 +109,46 @@ public class Player extends Entity {
                 : WeaponType.LINEAR;
         }
 
-        // 1. Horizontal Movement & Facing Logic (Arrow Left / Right)
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            x -= speed * dt;
-            facingRight = false;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            x += speed * dt;
-            facingRight = true;
+        // Dash / Dodge(Tombol Left Shift)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SHIFT_LEFT)
+            && !isDashing && dashCooldownTimer <= 0f && (isGrounded || canAirDash)) {
+            startDash();
         }
 
-        // 2. Jumping Logic (Tombol Z)
-        if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && isGrounded) {
-            velY = JUMP_VELOCITY;
-            isGrounded = false;
-        }
+        if (isDashing) {
+            x += dashDir * DASH_SPEED * dt;
+            velY = 0f;
+            dashTimer -= dt;
+            if (dashTimer <= 0f) {
+                isDashing = false;
+            }
+        } else {
+            // Horizontal
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                x -= speed * dt;
+                facingRight = false;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                x += speed * dt;
+                facingRight = true;
+            }
 
-        // Gravitasi & Ground Collision
-        velY += GRAVITY * dt;
-        y += velY * dt;
+            // Jump
+            if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && isGrounded) {
+                velY = JUMP_VELOCITY;
+                isGrounded = false;
+            }
 
-        if (y <= GROUND_Y) {
-            y = GROUND_Y;
-            velY = 0;
-            isGrounded = true;
+            // Gravitasi & Ground Collision
+            velY += GRAVITY * dt;
+            y += velY * dt;
+
+            if (y <= GROUND_Y) {
+                y = GROUND_Y;
+                velY = 0;
+                isGrounded = true;
+                canAirDash = true;
+            }
         }
 
         // Pembatas Layar
@@ -128,9 +158,32 @@ public class Player extends Entity {
         if (shootTimer > 0) shootTimer -= dt;
     }
 
+    private void startDash() {
+        boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
+
+        if (left && !right) {
+            dashDir = -1;
+            facingRight = false;
+        } else if (right && !left) {
+            dashDir = 1;
+            facingRight = true;
+        } else {
+            dashDir = facingRight ? 1 : -1;
+        }
+
+        isDashing = true;
+        dashTimer = DASH_DURATION;
+        dashCooldownTimer = DASH_COOLDOWN;
+        velY = 0f;
+        if (!isGrounded) {
+            canAirDash = false;
+        }
+    }
+
     // 3. Logika Menembak 8-Axis dengan Keyboard (Tombol X + Arrow Keys)
     public void shoot(List<Bullet> bullets) {
-        if (!active) return;
+        if (!active || isDashing) return;
         if (shootTimer <= 0 && Gdx.input.isKeyPressed(Input.Keys.X)) {
             float dirX = 0;
             float dirY = 0;
@@ -187,10 +240,17 @@ public class Player extends Entity {
         if (!active) return;
 
         // ijin nambahin  --Baygonz
-        if (invulnTimer > 0f && ((int) (invulnTimer * 10)) % 2 == 0) return;  // kedapkedip
+        if (invulnTimer > 0f && !isDashing && ((int) (invulnTimer * 10)) % 2 == 0) return;  // kedapkedip
         // ijin nambahin  --Baygonz
 
-        shape.setColor(Color.CYAN);
+        // Efek visual bayangan saat dodge/dash aktif
+        if (isDashing) {
+            shape.setColor(0f, 0.55f, 0.75f, 1f);
+            shape.rect(x - dashDir * 12f, y, width, height);
+            shape.setColor(Color.SKY);
+        } else {
+            shape.setColor(Color.CYAN);
+        }
         shape.rect(x, y, width, height);
 
         // Indikator visual sederhana (Mata/Arah Menghadap)
