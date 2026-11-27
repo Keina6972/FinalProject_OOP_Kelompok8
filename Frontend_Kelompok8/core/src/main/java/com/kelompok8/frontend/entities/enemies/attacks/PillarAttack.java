@@ -1,12 +1,12 @@
 package com.kelompok8.frontend.entities.enemies.attacks;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.Enemy;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +17,11 @@ public class PillarAttack implements BossAttack {
     private enum Phase { WAITING, WARNING, RISING, HOLDING, RETRACTING, DONE }
 
     // angka random, adjust aja nanti
-    private static final float FLOOR_Y = 100f;        // tinggi lantai (sama dengan GROUND_Y di Player)
+    private static final float FLOOR_Y = WorldConfig.GROUND_Y;
     private static final float PILLAR_WIDTH = 32f;
     private static final float PILLAR_HEIGHT = 320f;
     private static final float SPACING = 104f;        // jarak antar pusat pilar
-    private static final float EDGE_MARGIN = 48f;      // pilar min. segini dari dinding, biar celah di tepi arena tidak sempit
+    private static final float EDGE_MARGIN = 48f;     // pilar min. segini dari dinding, biar celah di tepi arena tidak sempit
     private static final float RISE_TIME = 0.12f;     // muncul cepat
     private static final float RETRACT_TIME = 0.25f;
     private static final float WAVE_INTERVAL = 1.3f;  // jeda antar awal gelombang
@@ -68,7 +68,7 @@ public class PillarAttack implements BossAttack {
         for (int w = 0; w < waves; w++) {
             float shift = (w % 2 == 1) ? SPACING / 2f : 0f;   // gelombang ganjil digeser setengah jarak
             float delay = w * WAVE_INTERVAL;
-            for (float x = baseOffset + shift - SPACING; x < Gdx.graphics.getWidth() + SPACING; x += SPACING) {
+            for (float x = baseOffset + shift - SPACING; x < WorldConfig.WORLD_WIDTH + SPACING; x += SPACING) {
                 pillars.add(new Pillar(x, delay));
             }
         }
@@ -94,7 +94,6 @@ public class PillarAttack implements BossAttack {
     private void updatePillar(Pillar p, float dt) {
         if (p.phase == Phase.DONE) return;
         p.timer -= dt;
-
 
         switch (p.phase) {
             case WAITING:
@@ -131,7 +130,7 @@ public class PillarAttack implements BossAttack {
         p.progress = 0f;
     }
 
-    // cek tabrakan pilar dengan player (invulnerable timer di Player mencegah kena berkali-kali)
+    // cek tabrakan pilar dengan player
     private void checkHit(Pillar p) {
         if (target == null || !target.isActive()) return;
         if (hitbox(p).overlaps(target.getBounds())) {
@@ -158,20 +157,20 @@ public class PillarAttack implements BossAttack {
 
     // NTAR TOLONG GANTI JADI SPRITE
 
-    // penanda di lantai (nanti: animasi pillar_warning)
+    // penanda di lantai
     private void drawWarning(ShapeRenderer shape, Pillar p) {
         float t = p.progress;
         shape.setColor(0.35f + 0.65f * t, 0.30f + 0.55f * t, 0.05f, 1f);
         shape.rect(p.centerX - PILLAR_WIDTH / 2f, FLOOR_Y, PILLAR_WIDTH, 6f);
     }
 
-    // pilar aktif (nanti: animasi pillar_erupt)
+    // pilar aktif
     private void drawPillar(ShapeRenderer shape, Pillar p) {
         shape.setColor(Color.WHITE);
         shape.rect(p.centerX - PILLAR_WIDTH / 2f, FLOOR_Y, PILLAR_WIDTH, p.height);
     }
 
-    // pilar menyusut (nanti: animasi pillar_fade)
+    // pilar menyusut
     private void drawRetracting(ShapeRenderer shape, Pillar p) {
         shape.setColor(Color.GRAY);
         shape.rect(p.centerX - PILLAR_WIDTH / 2f, FLOOR_Y, PILLAR_WIDTH, p.height);

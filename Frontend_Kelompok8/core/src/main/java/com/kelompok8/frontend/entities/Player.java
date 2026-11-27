@@ -164,7 +164,7 @@ public class Player extends Entity {
 
         // Pembatas Layar
         if (x < 0) x = 0;
-        if (x > Gdx.graphics.getWidth() - width) x = Gdx.graphics.getWidth() - width;
+        if (x > WorldConfig.WORLD_WIDTH - width) x = WorldConfig.WORLD_WIDTH - width;
 
         if (shootTimer > 0) shootTimer -= dt;
     }

@@ -1,9 +1,9 @@
 package com.kelompok8.frontend.states;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.kelompok8.frontend.cards.PlayerStats;
 import com.kelompok8.frontend.entities.Bullet;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.entities.enemies.Boss;
@@ -12,7 +12,6 @@ import com.kelompok8.frontend.entities.enemies.MiniBossA;
 import com.kelompok8.frontend.entities.enemies.projectiles.ProjectileManager;
 import com.kelompok8.frontend.utils.CollisionDetector;
 import com.kelompok8.frontend.utils.WorldConfig;
-import com.kelompok8.frontend.cards.PlayerStats;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,6 +19,7 @@ import java.util.List;
 
 public class PlayState extends GameState {
     private static final float BOSS_CONTACT_DAMAGE = 10f;
+
     // Faisal : menambahkan stat baru pada player
     private final PlayerStats playerStats;
     private final Player player;
@@ -33,7 +33,6 @@ public class PlayState extends GameState {
     }
 
     public PlayState(GameStateManager gsm, PlayerStats playerStats) {
-        // setup semua yang akan digunakan pada saat main
         super(gsm);
         this.playerStats = playerStats;
         this.player = new Player(100, WorldConfig.GROUND_Y, playerStats);
@@ -41,12 +40,12 @@ public class PlayState extends GameState {
         this.enemies = new ArrayList<>();
         this.projectiles = new ProjectileManager();
 
-        this.boss = new Boss("Boss", Gdx.graphics.getWidth() - 150, WorldConfig.GROUND_Y, player);
+        this.boss = new Boss("Boss", WorldConfig.WORLD_WIDTH - 150, WorldConfig.GROUND_Y, player);
         // rizki : sementara: Boss dimatikan biar MiniBossA bisa dites sendirian (apus baris ini kalo spawn order dah jadi)
         this.boss.setActive(false);
 
         this.enemies.add(boss);
-        this.enemies.add(new MiniBossA("Miniboss A", Gdx.graphics.getWidth() - 200, WorldConfig.GROUND_Y, player, projectiles));
+        this.enemies.add(new MiniBossA("Miniboss A", WorldConfig.WORLD_WIDTH - 200, WorldConfig.GROUND_Y, player, projectiles));
     }
 
     @Override
@@ -88,7 +87,7 @@ public class PlayState extends GameState {
             enemy.update();
             if (enemy.isActive()) {
                 allEnemiesDefeated = false;
-                // kalau kolisi dengan boss maka kena damage 10hp
+
                 if (CollisionDetector.checkCollision(player, enemy)) {
                     player.takeDamage(BOSS_CONTACT_DAMAGE);
                 }
@@ -98,7 +97,7 @@ public class PlayState extends GameState {
         // Rizki : biar projectile musuh bergerak dan mengecek collision ke player
         projectiles.update(player);
 
-        // 2. Cek Jika Boss agar Pindah ke Tampilan Pilih 3 Kartu
+        // 2. Cek Jika Boss / Semua Enemy Mati -> Pindah ke Tampilan Pilih 3 Kartu
         if (allEnemiesDefeated) {
             gsm.setState(new CardSelectState(gsm, playerStats));
         }
@@ -108,9 +107,9 @@ public class PlayState extends GameState {
     public void render(SpriteBatch batch, ShapeRenderer shape) {
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
-        // ground arena
+        // Gambarkan Lantai Arena (Ground)
         shape.setColor(Color.GRAY);
-        shape.rect(0, 0, Gdx.graphics.getWidth(), WorldConfig.GROUND_Y);
+        shape.rect(0, 0, WorldConfig.WORLD_WIDTH, WorldConfig.GROUND_Y);
 
         player.render(shape);
         for (Bullet bullet : bullets) {
@@ -125,18 +124,18 @@ public class PlayState extends GameState {
         // HUD HP Bar Player di pojok kiri atas
         float hpRatio = Math.max(0f, player.getHp() / player.getMaxHp());
         shape.setColor(Color.DARK_GRAY);
-        shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f, 12f);
+        shape.rect(10f, WorldConfig.WORLD_HEIGHT - 25f, 160f, 12f);
         shape.setColor(Color.CYAN);
-        shape.rect(10f, Gdx.graphics.getHeight() - 25f, 160f * hpRatio, 12f);
+        shape.rect(10f, WorldConfig.WORLD_HEIGHT - 25f, 160f * hpRatio, 12f);
 
-        // Active weapon (kuning = linear, merah = spread)
+        // Indikator Senjata Aktif di sebelah HP Bar (Kuning = Linear, Merah = Spread)
         shape.setColor(player.getCurrentWeapon() == Player.WeaponType.LINEAR ? Color.YELLOW : Color.RED);
-        shape.rect(178f, Gdx.graphics.getHeight() - 25f, 22f, 12f);
+        shape.rect(178f, WorldConfig.WORLD_HEIGHT - 25f, 22f, 12f);
 
         // Mukhtar: Indikator Phase Boss untuk kebutuhan debugging
         if (boss != null && boss.isActive()) {
             shape.setColor(boss.getCurrentPhase() == 1 ? Color.WHITE : Color.ORANGE);
-            shape.rect(10f, Gdx.graphics.getHeight() - 42f, 100f, 8f);
+            shape.rect(10f, WorldConfig.WORLD_HEIGHT - 42f, 100f, 8f);
         }
 
         shape.end();

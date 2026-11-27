@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class MenuState extends GameState {
     private final BitmapFont titleFont;
@@ -33,17 +35,16 @@ public class MenuState extends GameState {
 
         float btnWidth = 220f;
         float btnHeight = 60f;
-        float btnX = (Gdx.graphics.getWidth() - btnWidth) / 2f;
-        float btnY = (Gdx.graphics.getHeight() - btnHeight) / 2f - 20f;
+        float btnX = (WorldConfig.WORLD_WIDTH - btnWidth) / 2f;
+        float btnY = (WorldConfig.WORLD_HEIGHT - btnHeight) / 2f - 20f;
         this.playButtonBounds = new Rectangle(btnX, btnY, btnWidth, btnHeight);
     }
 
     @Override
     public void update(float dt) {
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+        Vector2 mouse = gsm.getMouseWorldPos();
 
-        isHovered = playButtonBounds.contains(mouseX, mouseY);
+        isHovered = playButtonBounds.contains(mouse.x, mouse.y);
 
         // Klik tombol PLAY dengan mouse atau tekan ENTER / Z
         boolean clickedPlay = isHovered && Gdx.input.justTouched();
@@ -57,8 +58,8 @@ public class MenuState extends GameState {
 
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
-        float screenW = Gdx.graphics.getWidth();
-        float screenH = Gdx.graphics.getHeight();
+        float screenW = WorldConfig.WORLD_WIDTH;
+        float screenH = WorldConfig.WORLD_HEIGHT;
 
         // 1. Render Tombol PLAY
         shape.begin(ShapeRenderer.ShapeType.Filled);

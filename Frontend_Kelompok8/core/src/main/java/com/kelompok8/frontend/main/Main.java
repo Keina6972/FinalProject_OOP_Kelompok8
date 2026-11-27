@@ -2,43 +2,55 @@ package com.kelompok8.frontend.main;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.kelompok8.frontend.audio.AudioManager;
 import com.kelompok8.frontend.states.GameStateManager;
 import com.kelompok8.frontend.states.MenuState;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
-    private ShapeRenderer shapeRenderer;
+    private ShapeRenderer shape;
     private GameStateManager gsm;
 
     @Override
     public void create() {
-        AudioManager.getInstance().loadAll();
         batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
+        shape = new ShapeRenderer();
+        AudioManager.getInstance().loadAll();
         gsm = new GameStateManager();
-        gsm.setState(new MenuState(gsm)); // Mulai dari Main Menu
+        gsm.push(new MenuState(gsm));
     }
 
     @Override
     public void render() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            if (Gdx.graphics.isFullscreen()) {
+                Gdx.graphics.setWindowedMode((int) WorldConfig.WORLD_WIDTH, (int) WorldConfig.WORLD_HEIGHT);
+            } else {
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            }
+        }
+
+        ScreenUtils.clear(0.08f, 0.08f, 0.1f, 1f);
         float dt = Gdx.graphics.getDeltaTime();
-
-        Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         gsm.update(dt);
-        gsm.render(batch, shapeRenderer);
+        gsm.render(batch, shape);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        gsm.resize(width, height);
     }
 
     @Override
     public void dispose() {
+        gsm.dispose();
         AudioManager.getInstance().dispose();
-        if (gsm != null) gsm.dispose();
-        if (batch != null) batch.dispose();
-        if (shapeRenderer != null) shapeRenderer.dispose();
+        batch.dispose();
+        shape.dispose();
     }
 }

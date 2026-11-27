@@ -8,54 +8,55 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class GameOverState extends GameState {
     private final BitmapFont titleFont;
     private final BitmapFont buttonFont;
     private final GlyphLayout layout;
 
-    private final Rectangle retryBounds;
-    private final Rectangle menuBounds;
-    private int selectedIndex = 0; // 0 = RETRY, 1 = MAIN MENU
+    private final Rectangle retryButton;
+    private final Rectangle menuButton;
+    private int selectedOption = 0;
 
     public GameOverState(GameStateManager gsm) {
         super(gsm);
         this.titleFont = new BitmapFont();
-        this.titleFont.getData().setScale(2.5f);
+        this.titleFont.getData().setScale(2.6f);
 
         this.buttonFont = new BitmapFont();
-        this.buttonFont.getData().setScale(1.4f);
+        this.buttonFont.getData().setScale(1.6f);
 
         this.layout = new GlyphLayout();
 
-        float btnW = 200f;
-        float btnH = 52f;
-        float centerX = (Gdx.graphics.getWidth() - btnW) / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f;
+        float btnWidth = 220f;
+        float btnHeight = 52f;
+        float centerX = (WorldConfig.WORLD_WIDTH - btnWidth) / 2f;
 
-        this.retryBounds = new Rectangle(centerX, centerY - 10f, btnW, btnH);
-        this.menuBounds = new Rectangle(centerX, centerY - 80f, btnW, btnH);
+        this.retryButton = new Rectangle(centerX, WorldConfig.WORLD_HEIGHT * 0.45f, btnWidth, btnHeight);
+        this.menuButton = new Rectangle(centerX, WorldConfig.WORLD_HEIGHT * 0.32f, btnWidth, btnHeight);
     }
 
     @Override
     public void update(float dt) {
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-
-        if (retryBounds.contains(mouseX, mouseY)) selectedIndex = 0;
-        if (menuBounds.contains(mouseX, mouseY)) selectedIndex = 1;
+        Vector2 mouse = gsm.getMouseWorldPos();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            selectedIndex = (selectedIndex == 0) ? 1 : 0;
+            selectedOption = (selectedOption == 0) ? 1 : 0;
         }
 
-        boolean mouseClicked = Gdx.input.justTouched()
-            && (retryBounds.contains(mouseX, mouseY) || menuBounds.contains(mouseX, mouseY));
-        boolean keyConfirmed = Gdx.input.isKeyJustPressed(Input.Keys.ENTER)
-            || Gdx.input.isKeyJustPressed(Input.Keys.Z);
+        boolean hoveredRetry = retryButton.contains(mouse.x, mouse.y);
+        boolean hoveredMenu = menuButton.contains(mouse.x, mouse.y);
 
-        if (mouseClicked || keyConfirmed) {
-            if (selectedIndex == 0) {
+        if (hoveredRetry) selectedOption = 0;
+        if (hoveredMenu) selectedOption = 1;
+
+        boolean clicked = (hoveredRetry || hoveredMenu) && Gdx.input.justTouched();
+        boolean confirmed = Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.Z);
+
+        if (clicked || confirmed) {
+            if (selectedOption == 0) {
                 gsm.setState(new PlayState(gsm));
             } else {
                 gsm.setState(new MenuState(gsm));
@@ -65,47 +66,36 @@ public class GameOverState extends GameState {
 
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
-        float screenW = Gdx.graphics.getWidth();
-        float screenH = Gdx.graphics.getHeight();
+        float screenW = WorldConfig.WORLD_WIDTH;
+        float screenH = WorldConfig.WORLD_HEIGHT;
 
-        // 1. Render Tombol
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setColor(selectedIndex == 0 ? Color.FIREBRICK : Color.DARK_GRAY);
-        shape.rect(retryBounds.x, retryBounds.y, retryBounds.width, retryBounds.height);
+        shape.setColor(selectedOption == 0 ? Color.GOLD : Color.DARK_GRAY);
+        shape.rect(retryButton.x, retryButton.y, retryButton.width, retryButton.height);
 
-        shape.setColor(selectedIndex == 1 ? Color.FIREBRICK : Color.DARK_GRAY);
-        shape.rect(menuBounds.x, menuBounds.y, menuBounds.width, menuBounds.height);
+        shape.setColor(selectedOption == 1 ? Color.LIGHT_GRAY : Color.DARK_GRAY);
+        shape.rect(menuButton.x, menuButton.y, menuButton.width, menuButton.height);
         shape.end();
 
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setColor(Color.WHITE);
-        shape.rect(retryBounds.x, retryBounds.y, retryBounds.width, retryBounds.height);
-        shape.rect(menuBounds.x, menuBounds.y, menuBounds.width, menuBounds.height);
-        shape.end();
-
-        // 2. Render Teks
         batch.begin();
 
-        String title = "YOU DIED";
+        String title = "GAME OVER";
         layout.setText(titleFont, title);
-        titleFont.setColor(Color.SCARLET);
-        titleFont.draw(batch, title, (screenW - layout.width) / 2f, screenH * 0.72f);
+        titleFont.setColor(Color.RED);
+        titleFont.draw(batch, title, (screenW - layout.width) / 2f, screenH * 0.75f);
 
-        drawButtonLabel(batch, "RETRY", retryBounds);
-        drawButtonLabel(batch, "MAIN MENU", menuBounds);
+        drawButtonText(batch, "RETRY", retryButton, selectedOption == 0 ? Color.BLACK : Color.WHITE);
+        drawButtonText(batch, "MAIN MENU", menuButton, selectedOption == 1 ? Color.BLACK : Color.WHITE);
 
         batch.end();
     }
 
-    private void drawButtonLabel(SpriteBatch batch, String text, Rectangle bounds) {
+    private void drawButtonText(SpriteBatch batch, String text, Rectangle rect, Color color) {
         layout.setText(buttonFont, text);
-        buttonFont.setColor(Color.WHITE);
-        buttonFont.draw(
-            batch,
-            text,
-            bounds.x + (bounds.width - layout.width) / 2f,
-            bounds.y + (bounds.height + layout.height) / 2f
-        );
+        buttonFont.setColor(color);
+        float textX = rect.x + (rect.width - layout.width) / 2f;
+        float textY = rect.y + (rect.height + layout.height) / 2f;
+        buttonFont.draw(batch, text, textX, textY);
     }
 
     @Override

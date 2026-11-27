@@ -8,8 +8,10 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.kelompok8.frontend.cards.BuffCard;
 import com.kelompok8.frontend.cards.PlayerStats;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class CardSelectState extends GameState {
     private static final int CARD_COUNT = 3;
@@ -24,7 +26,7 @@ public class CardSelectState extends GameState {
     private final GlyphLayout layout;
 
     private final Rectangle[] cards = new Rectangle[CARD_COUNT];
-    private int selectedCard = 1; // Default sorot kartu tengah
+    private int selectedCard = 1;
 
     public CardSelectState(GameStateManager gsm) {
         this(gsm, new PlayerStats());
@@ -48,14 +50,13 @@ public class CardSelectState extends GameState {
 
         this.layout = new GlyphLayout();
 
-        // Hitung posisi 3 kartu agar simetris di tengah layar
         float cardWidth = 185f;
         float cardHeight = 250f;
         float gap = 35f;
 
         float totalWidth = (cardWidth * CARD_COUNT) + (gap * (CARD_COUNT - 1));
-        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2f;
-        float startY = (Gdx.graphics.getHeight() - cardHeight) / 2f - 20f;
+        float startX = (WorldConfig.WORLD_WIDTH - totalWidth) / 2f;
+        float startY = (WorldConfig.WORLD_HEIGHT - cardHeight) / 2f - 20f;
 
         for (int i = 0; i < CARD_COUNT; i++) {
             cards[i] = new Rectangle(startX + i * (cardWidth + gap), startY, cardWidth, cardHeight);
@@ -65,10 +66,8 @@ public class CardSelectState extends GameState {
 
     @Override
     public void update(float dt) {
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+        Vector2 mouse = gsm.getMouseWorldPos();
 
-        // Navigasi keyboard Kiri / Kanan
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
             selectedCard = (selectedCard - 1 + CARD_COUNT) % CARD_COUNT;
         }
@@ -76,10 +75,9 @@ public class CardSelectState extends GameState {
             selectedCard = (selectedCard + 1) % CARD_COUNT;
         }
 
-        // Hover mouse
         boolean hoveredAny = false;
         for (int i = 0; i < CARD_COUNT; i++) {
-            if (cards[i].contains(mouseX, mouseY)) {
+            if (cards[i].contains(mouse.x, mouse.y)) {
                 selectedCard = i;
                 hoveredAny = true;
             }
@@ -98,10 +96,9 @@ public class CardSelectState extends GameState {
 
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
-        float screenW = Gdx.graphics.getWidth();
-        float screenH = Gdx.graphics.getHeight();
+        float screenW = WorldConfig.WORLD_WIDTH;
+        float screenH = WorldConfig.WORLD_HEIGHT;
 
-        // 1. Gambar Badan Kartu sesuai Rarity
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < CARD_COUNT; i++) {
             Rectangle c = cards[i];
@@ -114,7 +111,6 @@ public class CardSelectState extends GameState {
         }
         shape.end();
 
-        // 2. Gambar Bingkai / Border Kartu
         shape.begin(ShapeRenderer.ShapeType.Line);
         for (int i = 0; i < CARD_COUNT; i++) {
             Rectangle c = cards[i];
@@ -127,7 +123,6 @@ public class CardSelectState extends GameState {
         }
         shape.end();
 
-        // 3. Gambar Teks Rarity, Stat, dan Persentase Buff
         batch.begin();
 
         String header = "BOSS DEFEATED! CHOOSE A CARD";
@@ -141,7 +136,6 @@ public class CardSelectState extends GameState {
             boolean isSelected = (i == selectedCard);
             float liftY = isSelected ? 14f : 0f;
 
-            // Label Rarity di bagian atas kartu
             String rarityText = card.getRarity().label;
             layout.setText(rarityFont, rarityText);
             rarityFont.setColor(isSelected ? Color.GOLD : Color.WHITE);
@@ -152,7 +146,6 @@ public class CardSelectState extends GameState {
                 c.y + liftY + c.height - 28f
             );
 
-            // Nilai Persentase di tengah kartu
             String percentText = "+" + card.getBonusPercent() + "%";
             layout.setText(valueFont, percentText);
             valueFont.setColor(Color.WHITE);
@@ -163,7 +156,6 @@ public class CardSelectState extends GameState {
                 c.y + liftY + (c.height * 0.56f)
             );
 
-            // Nama Stat di bagian bawah kartu
             String statText = card.getStatType().displayName;
             layout.setText(statFont, statText);
             statFont.setColor(Color.LIGHT_GRAY);

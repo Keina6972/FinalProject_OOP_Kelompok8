@@ -1,9 +1,9 @@
 package com.kelompok8.frontend.entities.enemies.projectiles;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.kelompok8.frontend.entities.Player;
 import com.kelompok8.frontend.utils.CollisionDetector;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class ProjectileManager {
     private final Deque<MagicCircle> magicPool = new ArrayDeque<>();
     private final List<MagicCircle> magicActive = new ArrayList<>();
 
-    // ambil orb dari pool (kalau kosong baru bikin baru)
+    // ambil orb dari pool
     public FireOrb spawnFireOrb(float x, float y, float vx, float vy, float damage, ProjectileMovement movement) {
         FireOrb orb = pool.isEmpty() ? new FireOrb() : pool.pop();
         orb.init(x, y, vx, vy, damage, movement);
@@ -28,7 +28,7 @@ public class ProjectileManager {
         return orb;
     }
 
-    // ambil magic circle dari pool (kalau kosong baru bikin baru)
+    // ambil magic circle dari pool
     public MagicCircle spawnMagicCircle(float x, float y, float vx, float vy, float damage, ProjectileMovement movement) {
         MagicCircle circle = magicPool.isEmpty() ? new MagicCircle() : magicPool.pop();
         circle.init(x, y, vx, vy, damage, movement);
@@ -38,8 +38,8 @@ public class ProjectileManager {
 
     // update semua orb + cek tabrakan dengan player
     public void update(Player target) {
-        float w = Gdx.graphics.getWidth();
-        float h = Gdx.graphics.getHeight();
+        float w = WorldConfig.WORLD_WIDTH;
+        float h = WorldConfig.WORLD_HEIGHT;
 
         Iterator<FireOrb> it = active.iterator();
         while (it.hasNext()) {
@@ -91,7 +91,7 @@ public class ProjectileManager {
         for (MagicCircle circle : magicActive) circle.render(shape);
     }
 
-    // buang semua orb (misal ganti state)
+    // buang semua orb
     public void clear() {
         for (FireOrb orb : active) {
             orb.deactivate();

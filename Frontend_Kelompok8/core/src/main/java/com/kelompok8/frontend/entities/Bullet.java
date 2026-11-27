@@ -3,6 +3,7 @@ package com.kelompok8.frontend.entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.kelompok8.frontend.utils.WorldConfig;
 
 public class Bullet extends Entity {
     private final float dirX, dirY;
@@ -43,7 +44,7 @@ public class Bullet extends Entity {
         }
 
         // Auto hapus jika keluar dari area layar
-        if (x < -20 || x > Gdx.graphics.getWidth() + 20 || y < -20 || y > Gdx.graphics.getHeight() + 20) {
+        if (x < -20 || x > WorldConfig.WORLD_WIDTH + 20 || y < -20 || y > WorldConfig.WORLD_HEIGHT + 20) {
             active = false;
         }
     }
