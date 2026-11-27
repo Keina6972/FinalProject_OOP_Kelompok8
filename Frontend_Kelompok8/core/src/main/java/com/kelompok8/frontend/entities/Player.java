@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.kelompok8.frontend.audio.AudioManager;
+import com.kelompok8.frontend.audio.SoundType;
 import com.kelompok8.frontend.cards.PlayerStats;
 import com.kelompok8.frontend.utils.WorldConfig;
 
@@ -54,6 +56,7 @@ public class Player extends Entity {
     private static final float SPREAD_DAMAGE = 6f;
     private static final float SPREAD_RANGE = 260f;
     private static final float SPREAD_ANGLE = 15f;
+
     // faisal : menambah stats untuk menyimpan buff yang aktif
     private final PlayerStats stats;
     private WeaponType currentWeapon = WeaponType.LINEAR;
@@ -83,7 +86,13 @@ public class Player extends Entity {
         invulnTimer = INVULN_DURATION;
         stats.setCurrentHp(hp);
         System.out.println("Player HP: " + hp);
-        if (hp <= 0f) { hp = 0f; active = false; }
+        if (hp <= 0f) {
+            hp = 0f;
+            active = false;
+            AudioManager.getInstance().play(SoundType.PLAYER_DEATH);
+        } else {
+            AudioManager.getInstance().play(SoundType.PLAYER_HURT);
+        }
     }
     public float getHp() { return hp; }
     public float getMaxHp() { return maxHp; }
@@ -107,9 +116,10 @@ public class Player extends Entity {
             currentWeapon = (currentWeapon == WeaponType.LINEAR)
                 ? WeaponType.SPREAD
                 : WeaponType.LINEAR;
+            AudioManager.getInstance().play(SoundType.PLAYER_WEAPON_SWITCH);
         }
 
-        // Dash / Dodge(Tombol Left Shift)
+        // Dash / Dodge (Tombol Left Shift)
         if (Gdx.input.isKeyJustPressed(Input.Keys.SHIFT_LEFT)
             && !isDashing && dashCooldownTimer <= 0f && (isGrounded || canAirDash)) {
             startDash();
@@ -137,6 +147,7 @@ public class Player extends Entity {
             if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && isGrounded) {
                 velY = JUMP_VELOCITY;
                 isGrounded = false;
+                AudioManager.getInstance().play(SoundType.PLAYER_JUMP);
             }
 
             // Gravitasi & Ground Collision
@@ -179,6 +190,7 @@ public class Player extends Entity {
         if (!isGrounded) {
             canAirDash = false;
         }
+        AudioManager.getInstance().play(SoundType.PLAYER_DASH);
     }
 
     // 3. Logika Menembak 8-Axis dengan Keyboard (Tombol X + Arrow Keys)
@@ -216,6 +228,7 @@ public class Player extends Entity {
             if (currentWeapon == WeaponType.LINEAR) {
                 shootTimer = LINEAR_COOLDOWN / aspdMult;
                 bullets.add(new Bullet(bulletStartX, bulletStartY, dir.x, dir.y, LINEAR_DAMAGE * dmgMult, Color.YELLOW, -1f));
+                AudioManager.getInstance().play(SoundType.PLAYER_SHOOT_LINEAR);
             } else {
                 shootTimer = SPREAD_COOLDOWN / aspdMult;
                 float baseAngle = dir.angleDeg();
@@ -227,6 +240,7 @@ public class Player extends Entity {
                     float spreadY = MathUtils.sinDeg(angle);
                     bullets.add(new Bullet(bulletStartX, bulletStartY, spreadX, spreadY, SPREAD_DAMAGE * dmgMult, Color.RED, SPREAD_RANGE));
                 }
+                AudioManager.getInstance().play(SoundType.PLAYER_SHOOT_SPREAD);
             }
         }
     }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.kelompok8.frontend.audio.AudioManager;
 import com.kelompok8.frontend.states.GameStateManager;
 import com.kelompok8.frontend.states.MenuState;
 
@@ -15,6 +16,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
+        AudioManager.getInstance().loadAll();
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         gsm = new GameStateManager();
@@ -34,6 +36,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        AudioManager.getInstance().dispose();
         if (gsm != null) gsm.dispose();
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
