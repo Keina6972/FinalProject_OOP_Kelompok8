@@ -10,6 +10,7 @@ import com.kelompok8.frontend.audio.AudioManager;
 import com.kelompok8.frontend.states.GameStateManager;
 import com.kelompok8.frontend.states.MenuState;
 import com.kelompok8.frontend.ui.FontManager;
+import com.kelompok8.frontend.ui.PlayerAssets;
 import com.kelompok8.frontend.ui.UIAssets;
 import com.kelompok8.frontend.utils.WorldConfig;
 
@@ -25,6 +26,7 @@ public class Main extends ApplicationAdapter {
         AudioManager.getInstance().loadAll();
         FontManager.getInstance().loadAll();
         UIAssets.getInstance().loadAll();
+        PlayerAssets.getInstance().loadAll();
         gsm = new GameStateManager();
         gsm.push(new MenuState(gsm));
     }
@@ -56,6 +58,7 @@ public class Main extends ApplicationAdapter {
         UIAssets.getInstance().dispose();
         FontManager.getInstance().dispose();
         AudioManager.getInstance().dispose();
+        PlayerAssets.getInstance().dispose();
         batch.dispose();
         shape.dispose();
     }

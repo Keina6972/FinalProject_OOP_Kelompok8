@@ -14,6 +14,7 @@ public class AudioManager {
 
     private final Map<SoundType, Sound> sounds;
     private Music currentBgm;
+    private String currentBgmPath;
 
     private float volume = 1.0f;
     private float bgmVolume = 0.5f;
@@ -56,13 +57,49 @@ public class AudioManager {
         }
     }
 
+    public void playMenuBgm() {
+        playFirstAvailableBgm(
+            true,
+            "audio/main_menu_bgm.mp3",
+            "audio/main_menu_bgm.ogg",
+            "audio/main_menu_bgm.wav",
+            "audio/bgm_menu.mp3",
+            "audio/bgm_menu.ogg"
+        );
+    }
+
+    public void playGameOverBgm() {
+        playFirstAvailableBgm(
+            true,
+            "audio/game_over.mp3",
+            "audio/game_over.ogg",
+            "audio/game_over.wav",
+            "audio/bgm_gameover.mp3",
+            "audio/bgm_gameover.ogg"
+        );
+    }
+
+    private void playFirstAvailableBgm(boolean looping, String... paths) {
+        for (String path : paths) {
+            if (Gdx.files.internal(path).exists()) {
+                playBgm(path, looping);
+                return;
+            }
+        }
+        Gdx.app.log("AudioManager", "File BGM belum ditemukan: " + paths[0]);
+    }
+
     public void playBgm(String path, boolean looping) {
+        if (currentBgm != null && path.equals(currentBgmPath) && currentBgm.isPlaying()) {
+            return;
+        }
         stopBgm();
         FileHandle file = Gdx.files.internal(path);
         if (!file.exists()) {
             Gdx.app.log("AudioManager", "File BGM belum ditemukan: " + path);
             return;
         }
+        currentBgmPath = path;
         currentBgm = Gdx.audio.newMusic(file);
         currentBgm.setLooping(looping);
         currentBgm.setVolume(muted ? 0f : bgmVolume);
@@ -75,6 +112,7 @@ public class AudioManager {
             currentBgm.dispose();
             currentBgm = null;
         }
+        currentBgmPath = null;
     }
 
     public void setVolume(float volume) {

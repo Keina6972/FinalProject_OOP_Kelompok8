@@ -58,11 +58,10 @@ public class PlayState extends GameState {
     @Override
     public void update(float dt) {
         // 1. Cek State Mati Player (HP <= 0)
-        if (!player.isActive()) {
+        if (player.isDead()) {
             gsm.setState(new GameOverState(gsm));
             return;
         }
-
         player.update();
 
         // Panggil fungsi nembak (otomatis mengecek tombol X dan senjata aktif)
@@ -147,8 +146,12 @@ public class PlayState extends GameState {
 
         shape.end();
 
-        // Render HUD Pixel Art & Font
+        // Render HUD, Assets & Font
         batch.begin();
+        player.render(batch);
+        for (Bullet bullet : bullets) {
+            bullet.render(batch);
+        }
         drawHud(batch, ui);
         batch.end();
     }

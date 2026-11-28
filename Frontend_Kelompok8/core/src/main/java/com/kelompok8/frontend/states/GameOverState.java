@@ -35,6 +35,8 @@ public class GameOverState extends GameState {
 
         this.retryButton = new Rectangle(centerX, WorldConfig.WORLD_HEIGHT * 0.45f, btnWidth, btnHeight);
         this.menuButton = new Rectangle(centerX, WorldConfig.WORLD_HEIGHT * 0.31f, btnWidth, btnHeight);
+
+        AudioManager.getInstance().playGameOverBgm();
     }
 
     @Override
@@ -66,6 +68,7 @@ public class GameOverState extends GameState {
         if (clicked || confirmed) {
             AudioManager.getInstance().play(SoundType.UI_CLICK);
             if (selectedOption == 0) {
+                AudioManager.getInstance().stopBgm();
                 gsm.setState(new PlayState(gsm));
             } else {
                 gsm.setState(new MenuState(gsm));
@@ -91,6 +94,10 @@ public class GameOverState extends GameState {
         }
 
         batch.begin();
+
+        if (ui.gameOverBg != null) {
+            batch.draw(ui.gameOverBg, 0, 0, screenW, screenH);
+        }
 
         BitmapFont titleFont = fonts.titleFont;
         String title = "GAME OVER";

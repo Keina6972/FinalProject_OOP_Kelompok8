@@ -31,6 +31,8 @@ public class MenuState extends GameState {
         float btnX = (WorldConfig.WORLD_WIDTH - btnWidth) / 2f;
         float btnY = (WorldConfig.WORLD_HEIGHT - btnHeight) / 2f - 15f;
         this.playButtonBounds = new Rectangle(btnX, btnY, btnWidth, btnHeight);
+
+        AudioManager.getInstance().playMenuBgm();
     }
 
     @Override
@@ -49,6 +51,7 @@ public class MenuState extends GameState {
 
         if (clickedPlay || pressedStart) {
             AudioManager.getInstance().play(SoundType.UI_CLICK);
+            AudioManager.getInstance().stopBgm();
             gsm.setState(new PlayState(gsm));
         }
     }
@@ -68,6 +71,10 @@ public class MenuState extends GameState {
         }
 
         batch.begin();
+
+        if (ui.mainMenuBg != null) {
+            batch.draw(ui.mainMenuBg, 0, 0, screenW, screenH);
+        }
 
         // 1. Judul Game
         BitmapFont titleFont = fonts.titleFont;

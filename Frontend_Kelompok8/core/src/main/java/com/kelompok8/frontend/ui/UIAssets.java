@@ -12,6 +12,8 @@ public class UIAssets {
 
     private Texture tilesheetTex;
     private Texture keyboardTex;
+    public Texture mainMenuBg;
+    public Texture gameOverBg;
 
     // Button & Card Frame NinePatches (dari 32x32-Tilesheet.png)
     public NinePatch btnNormalPatch;
@@ -46,6 +48,8 @@ public class UIAssets {
     public void loadAll() {
         tilesheetTex = loadTextureSafe("ui/32x32-Tilesheet.png");
         keyboardTex = loadTextureSafe("ui/kb_light_all.png");
+        mainMenuBg = loadTextureSafe("ui/main_menu.png");
+        gameOverBg = loadTextureSafe("ui/game_over.png");
 
         if (tilesheetTex != null) {
             // Bingkai kartu 96x96 di pojok kiri atas
@@ -126,5 +130,7 @@ public class UIAssets {
     public void dispose() {
         if (tilesheetTex != null) tilesheetTex.dispose();
         if (keyboardTex != null) keyboardTex.dispose();
+        if (mainMenuBg != null) mainMenuBg.dispose();
+        if (gameOverBg != null) gameOverBg.dispose();
     }
 }

@@ -173,7 +173,6 @@ public class CardSelectState extends GameState {
         FontManager fonts = FontManager.getInstance();
         UIAssets ui = UIAssets.getInstance();
 
-        // Fallback ShapeRenderer kalau tekstur belum ada
         if (ui.cardFramePatch == null) {
             shape.begin(ShapeRenderer.ShapeType.Filled);
             for (int i = 0; i < revealedCount; i++) {
@@ -207,14 +206,12 @@ public class CardSelectState extends GameState {
             boolean isSelected = (phase != Phase.DEALING && i == selectedCard);
             float cardY = getCardRenderY(i);
 
-            // Gambar bingkai kartu NinePatch
             if (ui.cardFramePatch != null) {
                 batch.setColor(isSelected ? Color.WHITE : UNSELECTED_TINT);
                 ui.cardFramePatch.draw(batch, c.x, cardY, c.width, c.height);
                 batch.setColor(Color.WHITE);
             }
 
-            // Label Rarity (warna mengikuti borderColor rarity)
             String rarityText = rarity.label;
             layout.setText(rarityFont, rarityText);
             rarityFont.setColor(rarity.borderColor);
@@ -225,7 +222,6 @@ public class CardSelectState extends GameState {
                 cardY + c.height - 34f
             );
 
-            // Nilai Persentase Buff
             String percentText = "+" + card.getBonusPercent() + "%";
             layout.setText(valueFont, percentText);
             valueFont.setColor(isSelected ? Color.GOLD : Color.WHITE);
@@ -236,7 +232,6 @@ public class CardSelectState extends GameState {
                 cardY + (c.height * 0.55f)
             );
 
-            // Nama Stat
             String statText = card.getStatType().displayName;
             layout.setText(statFont, statText);
             statFont.setColor(Color.LIGHT_GRAY);
@@ -248,7 +243,6 @@ public class CardSelectState extends GameState {
             );
         }
 
-        // Petunjuk kontrol di bawah layar
         if (phase == Phase.CHOOSING) {
             drawHintBar(batch, fonts.smallFont, ui, screenW, screenH * 0.12f);
         }
@@ -257,7 +251,13 @@ public class CardSelectState extends GameState {
     }
 
     private void drawHintBar(SpriteBatch batch, BitmapFont font, UIAssets ui, float screenW, float centerY) {
-        if (ui.keyLeft == null || ui.keyRight == null || ui.keyZ == null) return;
+        if (ui.keyLeft == null || ui.keyRight == null || ui.keyZ == null) {
+            String fallback = "Left / Right: Select   |   Z / Enter: Confirm";
+            layout.setText(font, fallback);
+            font.setColor(Color.LIGHT_GRAY);
+            font.draw(batch, fallback, (screenW - layout.width) / 2f, centerY);
+            return;
+        }
 
         float iconSize = 22f;
         float keyGap = 3f;
@@ -297,6 +297,5 @@ public class CardSelectState extends GameState {
 
     @Override
     public void dispose() {
-        // Aset dikelola secara terpusat oleh UIAssets & FontManager
     }
 }
